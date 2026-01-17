@@ -8,78 +8,89 @@ interface EgoNetworkProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Neural Constellation graph styles - Ego Network variant
+// Apple-inspired minimal graph styles - Ego Network
 const graphStyles: cytoscape.StylesheetStyle[] = [
+  // Adjacent nodes - clean white circles
   {
     selector: 'node',
     style: {
-      'background-color': '#8b5cf6',
+      'background-color': '#ffffff',
       'background-opacity': 0.9,
       'label': 'data(label)',
-      'color': '#f0f0f5',
+      'color': 'rgba(255, 255, 255, 0.9)',
       'text-valign': 'bottom',
       'text-halign': 'center',
       'font-size': '11px',
-      'font-family': 'Sora, sans-serif',
+      'font-family': '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
       'font-weight': 500,
-      'text-margin-y': 12,
-      'width': 48,
-      'height': 48,
+      'text-margin-y': 10,
+      'width': 40,
+      'height': 40,
       'text-wrap': 'wrap',
       'text-max-width': '85px',
-      'text-outline-color': '#0a0a0f',
-      'text-outline-width': 2,
-      'border-width': 2,
-      'border-color': '#00f5ff',
-      'border-opacity': 0.5,
-      'transition-property': 'background-color, border-color, width, height, border-width',
-      'transition-duration': 300,
+      'text-outline-color': 'rgba(0, 0, 0, 0.8)',
+      'text-outline-width': 1.5,
+      'border-width': 0,
+      'shadow-blur': 16,
+      'shadow-color': 'rgba(0, 0, 0, 0.2)',
+      'shadow-opacity': 1,
+      'shadow-offset-x': 0,
+      'shadow-offset-y': 3,
+      'transition-property': 'background-color, width, height, shadow-blur, shadow-offset-y',
+      'transition-duration': 250,
+      'transition-timing-function': 'ease-out',
     } as any,
   },
+  // Focus node - prominent blue center
   {
     selector: 'node.focus',
     style: {
-      'background-color': '#00f5ff',
-      'background-opacity': 1,
-      'width': 80,
-      'height': 80,
-      'font-weight': 700,
-      'font-size': '14px',
-      'border-width': 4,
-      'border-color': '#ffffff',
-      'border-opacity': 1,
-      'text-margin-y': 16,
+      'background-color': '#007AFF',
+      'width': 64,
+      'height': 64,
+      'font-weight': 600,
+      'font-size': '13px',
+      'color': '#ffffff',
+      'text-margin-y': 14,
+      'shadow-blur': 32,
+      'shadow-color': 'rgba(0, 122, 255, 0.35)',
+      'shadow-offset-y': 6,
+      'z-index': 999,
     } as any,
   },
+  // Hover state - gentle lift
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#ff00aa',
-      'border-color': '#ffffff',
-      'border-width': 3,
+      'background-color': '#ffffff',
       'cursor': 'pointer',
-      'width': 56,
-      'height': 56,
+      'width': 46,
+      'height': 46,
+      'shadow-blur': 24,
+      'shadow-color': 'rgba(0, 0, 0, 0.18)',
+      'shadow-offset-y': 8,
     } as any,
   },
+  // Edge styles - subtle lines
   {
     selector: 'edge',
     style: {
-      'width': 2,
-      'line-color': '#8b5cf650',
+      'width': 1,
+      'line-color': 'rgba(255, 255, 255, 0.25)',
       'curve-style': 'bezier',
       'target-arrow-shape': 'none',
-      'line-opacity': 0.7,
-      'transition-property': 'line-color, width, line-opacity',
-      'transition-duration': 300,
+      'line-cap': 'round',
+      'transition-property': 'line-color, width',
+      'transition-duration': 250,
     } as any,
   },
+  // Highlighted edge
   {
     selector: 'edge.highlighted',
     style: {
-      'width': 4,
-      'line-color': '#00f5ff',
-      'line-opacity': 1,
+      'width': 2,
+      'line-color': 'rgba(0, 122, 255, 0.5)',
+      'z-index': 999,
     } as any,
   },
 ];
@@ -372,7 +383,55 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
                 cy.edges().removeClass('highlighted');
               });
             }}
+            minZoom={0.5}
+            maxZoom={2}
+            boxSelectionEnabled={false}
+            autounselectify={true}
+            {...{ wheelSensitivity: 0.2 } as any}
           />
+        </div>
+
+        {/* Zoom controls */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
+          <button
+            onClick={() => cyRef.current?.zoom(cyRef.current.zoom() * 1.2)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium transition-all duration-300"
+            style={{
+              background: 'rgba(26, 26, 46, 0.9)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#f0f0f5',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="Zoom in"
+          >
+            +
+          </button>
+          <button
+            onClick={() => cyRef.current?.zoom(cyRef.current.zoom() / 1.2)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium transition-all duration-300"
+            style={{
+              background: 'rgba(26, 26, 46, 0.9)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#f0f0f5',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="Zoom out"
+          >
+            −
+          </button>
+          <button
+            onClick={() => cyRef.current?.fit(undefined, 50)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold transition-all duration-300"
+            style={{
+              background: 'rgba(26, 26, 46, 0.9)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#f0f0f5',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="Fit to screen"
+          >
+            FIT
+          </button>
         </div>
 
         {/* Floating interaction hint */}

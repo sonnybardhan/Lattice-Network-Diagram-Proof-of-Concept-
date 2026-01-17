@@ -7,60 +7,72 @@ interface TagClusterViewProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Neural Constellation graph styles - Tag Cluster variant
+// Apple-inspired minimal graph styles - Tag Cluster
 const graphStyles: cytoscape.StylesheetStyle[] = [
+  // Compact nodes - clean circles
   {
     selector: 'node',
     style: {
-      'background-color': '#8b5cf6',
-      'background-opacity': 0.9,
+      'background-color': '#ffffff',
+      'background-opacity': 0.85,
       'label': 'data(label)',
-      'color': '#f0f0f5',
+      'color': 'rgba(255, 255, 255, 0.85)',
       'text-valign': 'bottom',
       'text-halign': 'center',
       'font-size': '10px',
-      'font-family': 'Sora, sans-serif',
+      'font-family': '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
       'font-weight': 500,
       'text-margin-y': 8,
-      'width': 38,
-      'height': 38,
+      'width': 36,
+      'height': 36,
       'text-wrap': 'wrap',
       'text-max-width': '75px',
-      'text-outline-color': '#0a0a0f',
-      'text-outline-width': 2,
-      'border-width': 2,
-      'border-color': '#00f5ff',
-      'border-opacity': 0.4,
-      'transition-property': 'background-color, border-color, width, height',
+      'text-outline-color': 'rgba(0, 0, 0, 0.75)',
+      'text-outline-width': 1.5,
+      'border-width': 0,
+      'shadow-blur': 14,
+      'shadow-color': 'rgba(0, 0, 0, 0.18)',
+      'shadow-opacity': 1,
+      'shadow-offset-x': 0,
+      'shadow-offset-y': 3,
+      'transition-property': 'background-color, width, height, shadow-blur, shadow-offset-y',
       'transition-duration': 250,
+      'transition-timing-function': 'ease-out',
     } as any,
   },
+  // Hover state - gentle lift
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#00f5ff',
-      'border-color': '#ffffff',
-      'border-width': 2,
+      'background-color': '#ffffff',
       'cursor': 'pointer',
-      'width': 44,
-      'height': 44,
+      'width': 42,
+      'height': 42,
+      'shadow-blur': 20,
+      'shadow-color': 'rgba(0, 0, 0, 0.15)',
+      'shadow-offset-y': 6,
     } as any,
   },
+  // Edge styles - fine lines
   {
     selector: 'edge',
     style: {
-      'width': 1.5,
-      'line-color': '#8b5cf640',
+      'width': 1,
+      'line-color': 'rgba(255, 255, 255, 0.18)',
       'curve-style': 'bezier',
-      'line-opacity': 0.5,
+      'target-arrow-shape': 'none',
+      'line-cap': 'round',
+      'transition-property': 'line-color, width',
+      'transition-duration': 250,
     } as any,
   },
+  // Highlighted edge
   {
     selector: 'edge.highlighted',
     style: {
-      'width': 3,
-      'line-color': '#00f5ff',
-      'line-opacity': 1,
+      'width': 1.5,
+      'line-color': 'rgba(0, 122, 255, 0.45)',
+      'z-index': 999,
     } as any,
   },
 ];
@@ -507,6 +519,11 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
                         evt.target.connectedEdges().removeClass('highlighted');
                       });
                     }}
+                    minZoom={0.5}
+                    maxZoom={2}
+                    boxSelectionEnabled={false}
+                    autounselectify={true}
+                    {...{ wheelSensitivity: 0.2 } as any}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full" style={{ color: '#6b6b80' }}>

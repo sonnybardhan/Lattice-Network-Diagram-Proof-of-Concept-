@@ -11,136 +11,137 @@ interface GraphContainerProps {
   variant?: 'default' | 'ego' | 'filtered' | 'cluster';
 }
 
-// Neural Constellation graph styles
+// Apple-inspired minimal graph styles
 const graphStyles: cytoscape.StylesheetStyle[] = [
-  // Base node style - luminous orbs
+  // Base node - clean, minimal
   {
     selector: 'node',
     style: {
-      'background-color': '#8b5cf6',
-      'background-opacity': 0.9,
+      'background-color': '#ffffff',
+      'background-opacity': 0.95,
       'label': 'data(label)',
-      'color': '#f0f0f5',
+      'color': 'rgba(255, 255, 255, 0.9)',
       'text-valign': 'bottom',
       'text-halign': 'center',
       'font-size': '11px',
-      'font-family': 'Sora, sans-serif',
+      'font-family': '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
       'font-weight': 500,
       'text-margin-y': 10,
       'width': 44,
       'height': 44,
       'text-wrap': 'wrap',
-      'text-max-width': '90px',
-      'text-outline-color': '#0a0a0f',
-      'text-outline-width': 2,
-      'border-width': 2,
-      'border-color': '#00f5ff',
-      'border-opacity': 0.6,
-      // Glow effect via overlay
-      'overlay-padding': 8,
+      'text-max-width': '88px',
+      'text-outline-color': 'rgba(0, 0, 0, 0.8)',
+      'text-outline-width': 1.5,
+      'border-width': 0,
+      'shadow-blur': 20,
+      'shadow-color': 'rgba(0, 0, 0, 0.25)',
+      'shadow-opacity': 1,
+      'shadow-offset-x': 0,
+      'shadow-offset-y': 4,
+      'overlay-padding': 6,
       'overlay-opacity': 0,
-      'transition-property': 'background-color, border-color, width, height, border-width',
-      'transition-duration': 300,
+      'transition-property': 'background-color, width, height, shadow-blur, shadow-opacity',
+      'transition-duration': 250,
+      'transition-timing-function': 'ease-out',
     } as any,
   },
-  // Focus node - central glowing neuron
+  // Focus node - Apple blue accent
   {
     selector: 'node.focus',
     style: {
-      'background-color': '#00f5ff',
-      'background-opacity': 1,
-      'width': 70,
-      'height': 70,
+      'background-color': '#007AFF',
+      'width': 56,
+      'height': 56,
       'font-weight': 600,
-      'font-size': '13px',
-      'border-width': 4,
-      'border-color': '#ffffff',
-      'border-opacity': 0.9,
-      'text-margin-y': 14,
+      'font-size': '12px',
+      'color': '#ffffff',
+      'text-margin-y': 12,
+      'shadow-blur': 30,
+      'shadow-color': 'rgba(0, 122, 255, 0.4)',
+      'shadow-offset-y': 6,
       'z-index': 999,
     } as any,
   },
-  // Hover state - pulse effect
+  // Hover state - subtle lift
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#00f5ff',
-      'border-color': '#ffffff',
-      'border-width': 3,
+      'background-color': '#ffffff',
       'cursor': 'pointer',
-      'width': 52,
-      'height': 52,
+      'width': 48,
+      'height': 48,
+      'shadow-blur': 28,
+      'shadow-color': 'rgba(0, 0, 0, 0.2)',
+      'shadow-offset-y': 8,
     } as any,
   },
-  // Adjacent nodes in ego view
+  // Adjacent nodes
   {
     selector: 'node.adjacent',
     style: {
-      'background-color': '#ff00aa',
-      'border-color': '#ff00aa',
-      'width': 40,
-      'height': 40,
+      'background-color': 'rgba(255, 255, 255, 0.85)',
+      'width': 38,
+      'height': 38,
     } as any,
   },
   // Highlighted nodes
   {
     selector: 'node.highlighted',
     style: {
-      'background-color': '#10b981',
-      'border-color': '#10b981',
-      'border-width': 3,
+      'background-color': '#34C759',
+      'shadow-color': 'rgba(52, 199, 89, 0.4)',
     } as any,
   },
-  // Best fit node in filtered view
+  // Best fit node
   {
     selector: 'node.best-fit',
     style: {
-      'background-color': '#ffd700',
-      'border-color': '#ffffff',
-      'border-width': 4,
-      'width': 60,
-      'height': 60,
+      'background-color': '#FF9500',
+      'width': 52,
+      'height': 52,
       'font-weight': 600,
       'font-size': '12px',
+      'shadow-blur': 28,
+      'shadow-color': 'rgba(255, 149, 0, 0.35)',
+      'shadow-offset-y': 6,
     } as any,
   },
-  // Edge styles - synaptic connections
+  // Edge styles - hairline connections
   {
     selector: 'edge',
     style: {
-      'width': 2,
-      'line-color': '#8b5cf640',
+      'width': 1,
+      'line-color': 'rgba(255, 255, 255, 0.2)',
       'curve-style': 'bezier',
       'target-arrow-shape': 'none',
-      'line-opacity': 0.6,
+      'line-cap': 'round',
       'transition-property': 'line-color, width, line-opacity',
-      'transition-duration': 300,
+      'transition-duration': 250,
     } as any,
   },
   // Strong connection
   {
     selector: 'edge[strength = "strong"]',
     style: {
-      'width': 3,
-      'line-color': '#00f5ff60',
-      'line-opacity': 0.8,
+      'width': 1.5,
+      'line-color': 'rgba(255, 255, 255, 0.35)',
     } as any,
   },
   // Moderate connection
   {
     selector: 'edge[strength = "moderate"]',
     style: {
-      'width': 2,
-      'line-color': '#8b5cf650',
+      'width': 1,
+      'line-color': 'rgba(255, 255, 255, 0.2)',
     } as any,
   },
-  // Highlighted edge - glowing synapse
+  // Highlighted edge
   {
     selector: 'edge.highlighted',
     style: {
-      'line-color': '#00f5ff',
-      'width': 4,
-      'line-opacity': 1,
+      'line-color': 'rgba(0, 122, 255, 0.6)',
+      'width': 2,
       'z-index': 999,
     } as any,
   },
@@ -148,9 +149,8 @@ const graphStyles: cytoscape.StylesheetStyle[] = [
   {
     selector: ':selected',
     style: {
-      'background-color': '#00f5ff',
-      'border-color': '#ffffff',
-      'line-color': '#00f5ff',
+      'background-color': '#007AFF',
+      'line-color': 'rgba(0, 122, 255, 0.6)',
     } as any,
   },
 ];
@@ -261,14 +261,15 @@ export function GraphContainer({
         autounselectify={true}
         userZoomingEnabled={true}
         userPanningEnabled={true}
-        minZoom={0.3}
-        maxZoom={2.5}
+        minZoom={0.5}
+        maxZoom={2}
+        {...{ wheelSensitivity: 0.2 } as any}
       />
 
       {/* Zoom controls */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2">
         <button
-          onClick={() => cyRef.current?.zoom(cyRef.current.zoom() * 1.3)}
+          onClick={() => cyRef.current?.zoom(cyRef.current.zoom() * 1.2)}
           className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium transition-all duration-300"
           style={{
             background: 'rgba(26, 26, 46, 0.9)',
@@ -289,7 +290,7 @@ export function GraphContainer({
           +
         </button>
         <button
-          onClick={() => cyRef.current?.zoom(cyRef.current.zoom() / 1.3)}
+          onClick={() => cyRef.current?.zoom(cyRef.current.zoom() / 1.2)}
           className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium transition-all duration-300"
           style={{
             background: 'rgba(26, 26, 46, 0.9)',

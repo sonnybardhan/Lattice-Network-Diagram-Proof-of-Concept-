@@ -8,92 +8,105 @@ interface FilteredSubgraphProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Neural Constellation graph styles - Filtered View variant
+// Apple-inspired minimal graph styles - Filtered View
 const graphStyles: cytoscape.StylesheetStyle[] = [
+  // Base nodes - clean white
   {
     selector: 'node',
     style: {
-      'background-color': '#8b5cf6',
+      'background-color': '#ffffff',
       'background-opacity': 0.9,
       'label': 'data(label)',
-      'color': '#f0f0f5',
+      'color': 'rgba(255, 255, 255, 0.9)',
       'text-valign': 'bottom',
       'text-halign': 'center',
       'font-size': '11px',
-      'font-family': 'Sora, sans-serif',
+      'font-family': '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
       'font-weight': 500,
       'text-margin-y': 10,
-      'width': 46,
-      'height': 46,
+      'width': 42,
+      'height': 42,
       'text-wrap': 'wrap',
       'text-max-width': '85px',
-      'text-outline-color': '#0a0a0f',
-      'text-outline-width': 2,
-      'border-width': 2,
-      'border-color': '#00f5ff',
-      'border-opacity': 0.5,
-      'transition-property': 'background-color, border-color, width, height, border-width',
-      'transition-duration': 300,
+      'text-outline-color': 'rgba(0, 0, 0, 0.8)',
+      'text-outline-width': 1.5,
+      'border-width': 0,
+      'shadow-blur': 18,
+      'shadow-color': 'rgba(0, 0, 0, 0.2)',
+      'shadow-opacity': 1,
+      'shadow-offset-x': 0,
+      'shadow-offset-y': 4,
+      'transition-property': 'background-color, width, height, shadow-blur, shadow-offset-y',
+      'transition-duration': 250,
+      'transition-timing-function': 'ease-out',
     } as any,
   },
+  // Best fit node - Apple orange
   {
     selector: 'node.best-fit',
     style: {
-      'background-color': '#ffd700',
-      'background-opacity': 1,
-      'width': 65,
-      'height': 65,
-      'font-weight': 700,
-      'font-size': '13px',
-      'border-width': 4,
-      'border-color': '#ffffff',
-      'border-opacity': 1,
-      'text-margin-y': 14,
+      'background-color': '#FF9500',
+      'width': 56,
+      'height': 56,
+      'font-weight': 600,
+      'font-size': '12px',
+      'color': '#ffffff',
+      'text-margin-y': 12,
+      'shadow-blur': 28,
+      'shadow-color': 'rgba(255, 149, 0, 0.35)',
+      'shadow-offset-y': 6,
+      'z-index': 999,
     } as any,
   },
+  // Hover state - subtle lift
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#00f5ff',
-      'border-color': '#ffffff',
-      'border-width': 3,
+      'background-color': '#ffffff',
       'cursor': 'pointer',
-      'width': 54,
-      'height': 54,
+      'width': 48,
+      'height': 48,
+      'shadow-blur': 26,
+      'shadow-color': 'rgba(0, 0, 0, 0.18)',
+      'shadow-offset-y': 8,
     } as any,
   },
+  // Edge styles - hairline
   {
     selector: 'edge',
     style: {
-      'width': 2,
-      'line-color': '#8b5cf650',
+      'width': 1,
+      'line-color': 'rgba(255, 255, 255, 0.2)',
       'curve-style': 'bezier',
-      'line-opacity': 0.6,
-      'transition-property': 'line-color, width, line-opacity',
-      'transition-duration': 300,
+      'target-arrow-shape': 'none',
+      'line-cap': 'round',
+      'transition-property': 'line-color, width',
+      'transition-duration': 250,
     } as any,
   },
+  // Strong connection
   {
     selector: 'edge[strength = "strong"]',
     style: {
-      'width': 4,
-      'line-color': '#00f5ff50',
-      'line-opacity': 0.8,
+      'width': 1.5,
+      'line-color': 'rgba(255, 255, 255, 0.3)',
     } as any,
   },
+  // Moderate connection
   {
     selector: 'edge[strength = "moderate"]',
     style: {
-      'width': 2,
-      'line-color': '#8b5cf640',
+      'width': 1,
+      'line-color': 'rgba(255, 255, 255, 0.2)',
     } as any,
   },
+  // Highlighted edge
   {
     selector: 'edge.highlighted',
     style: {
-      'width': 4,
-      'line-color': '#00f5ff',
-      'line-opacity': 1,
+      'width': 2,
+      'line-color': 'rgba(0, 122, 255, 0.5)',
+      'z-index': 999,
     } as any,
   },
 ];
@@ -358,7 +371,55 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
                 cy.edges().removeClass('highlighted');
               });
             }}
+            minZoom={0.5}
+            maxZoom={2}
+            boxSelectionEnabled={false}
+            autounselectify={true}
+            {...{ wheelSensitivity: 0.2 } as any}
           />
+        </div>
+
+        {/* Zoom controls */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-10">
+          <button
+            onClick={() => cyRef.current?.zoom(cyRef.current.zoom() * 1.2)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium transition-all duration-300"
+            style={{
+              background: 'rgba(26, 26, 46, 0.9)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#f0f0f5',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="Zoom in"
+          >
+            +
+          </button>
+          <button
+            onClick={() => cyRef.current?.zoom(cyRef.current.zoom() / 1.2)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-medium transition-all duration-300"
+            style={{
+              background: 'rgba(26, 26, 46, 0.9)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#f0f0f5',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="Zoom out"
+          >
+            −
+          </button>
+          <button
+            onClick={() => cyRef.current?.fit(undefined, 50)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold transition-all duration-300"
+            style={{
+              background: 'rgba(26, 26, 46, 0.9)',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              color: '#f0f0f5',
+              backdropFilter: 'blur(10px)',
+            }}
+            title="Fit to screen"
+          >
+            FIT
+          </button>
         </div>
 
         {/* Floating interaction hint */}
@@ -374,19 +435,19 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
         )}
 
         {/* Legend */}
-        <div className="absolute bottom-4 right-4 px-4 py-3 rounded-xl" style={{
+        <div className="absolute bottom-20 right-4 px-4 py-3 rounded-xl" style={{
           background: 'rgba(10, 10, 15, 0.9)',
           border: '1px solid rgba(139, 92, 246, 0.3)',
           backdropFilter: 'blur(10px)',
         }}>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ background: '#ffd700', boxShadow: '0 0 8px rgba(255, 215, 0, 0.5)' }} />
-              <span style={{ color: '#a0a0b5' }}>Best Fit</span>
+              <div className="w-3 h-3 rounded-full" style={{ background: '#FF9500' }} />
+              <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Best Fit</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ background: '#8b5cf6' }} />
-              <span style={{ color: '#a0a0b5' }}>Related</span>
+              <div className="w-3 h-3 rounded-full" style={{ background: '#ffffff' }} />
+              <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Related</span>
             </div>
           </div>
         </div>
@@ -434,20 +495,19 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold" style={{ color: isHovered ? '#00f5ff' : '#f0f0f5' }}>
+                      <h3 className="font-semibold" style={{ color: isHovered ? '#007AFF' : '#f0f0f5' }}>
                         {model.name}
                       </h3>
                       {isBestFit && (
-                        <span className="px-2 py-0.5 text-xs font-semibold rounded-full" style={{
-                          background: 'rgba(255, 215, 0, 0.2)',
-                          color: '#ffd700',
-                          border: '1px solid rgba(255, 215, 0, 0.4)',
+                        <span className="px-2 py-0.5 text-xs font-medium rounded-full" style={{
+                          background: 'rgba(255, 149, 0, 0.15)',
+                          color: '#FF9500',
                         }}>
                           Best Fit
                         </span>
                       )}
                     </div>
-                    <p className="mt-1.5 text-sm italic" style={{ color: '#00f5ff' }}>
+                    <p className="mt-1.5 text-sm italic" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                       "{model.diagnosticQuestion}"
                     </p>
                     <p className="mt-2 text-sm line-clamp-2" style={{ color: '#a0a0b5' }}>
@@ -457,7 +517,7 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
                 </div>
                 <button
                   className="mt-3 text-sm font-medium flex items-center gap-1 transition-all duration-300"
-                  style={{ color: isHovered ? '#00f5ff' : '#8b5cf6' }}
+                  style={{ color: isHovered ? '#007AFF' : 'rgba(255, 255, 255, 0.5)' }}
                   onClick={(e) => {
                     e.stopPropagation();
                     onModelSelect(model.id);
