@@ -10,6 +10,12 @@ export const tags: Tag[] = [
       {
         text: "I have too many options and need to prioritize",
         modelIds: ["eisenhower-matrix", "pareto-principle", "satisficing"],
+        l3Question: "What's the prioritization challenge?",
+        l3Options: [
+          { text: "Separating urgent from important", modelId: "eisenhower-matrix" },
+          { text: "Finding the vital few that drive most results", modelId: "pareto-principle" },
+          { text: "Accepting good enough to move forward", modelId: "satisficing" },
+        ],
       },
       {
         text: "I need to evaluate trade-offs between choices",
@@ -18,6 +24,13 @@ export const tags: Tag[] = [
           "comparative-advantage",
           "expected-value",
           "diminishing-returns",
+        ],
+        l3Question: "What's the nature of the trade-off?",
+        l3Options: [
+          { text: "Choosing between fundamentally different paths", modelId: "opportunity-cost" },
+          { text: "Deciding where to focus my limited strengths", modelId: "comparative-advantage" },
+          { text: "Weighing probabilities and payoffs", modelId: "expected-value" },
+          { text: "Wondering if more effort is worth it", modelId: "diminishing-returns" },
         ],
       },
       {
@@ -31,6 +44,12 @@ export const tags: Tag[] = [
       {
         text: "I want to stress-test or de-risk my decision",
         modelIds: ["pre-mortem", "inversion", "regret-minimization"],
+        l3Question: "How do you want to stress-test?",
+        l3Options: [
+          { text: "Imagine future failure and work backward", modelId: "pre-mortem" },
+          { text: "Ask what would guarantee failure and avoid that", modelId: "inversion" },
+          { text: "Consider which choice I'll regret least long-term", modelId: "regret-minimization" },
+        ],
       },
       {
         text: "I'm stuck and need to reframe from scratch",
@@ -38,6 +57,12 @@ export const tags: Tag[] = [
           "first-principles",
           "via-negativa",
           "via-positiva-vs-via-negativa",
+        ],
+        l3Question: "How do you want to reframe?",
+        l3Options: [
+          { text: "Break it down to fundamental truths and rebuild", modelId: "first-principles" },
+          { text: "Figure out what to remove or stop doing", modelId: "via-negativa" },
+          { text: "Decide whether to add or subtract", modelId: "via-positiva-vs-via-negativa" },
         ],
       },
       {
@@ -82,6 +107,12 @@ export const tags: Tag[] = [
       {
         text: "They're responding to rewards or penalties I haven't considered",
         modelIds: ["incentives", "moral-hazard", "principal-agent-problem"],
+        l3Question: "What's the relationship between you and them?",
+        l3Options: [
+          { text: "They're acting on their own interests, not related to me", modelId: "incentives" },
+          { text: "They're supposed to be acting on my behalf", modelId: "principal-agent-problem" },
+          { text: "They're taking risks because they won't bear the consequences", modelId: "moral-hazard" },
+        ],
       },
       {
         text: "A metric or rule is creating perverse outcomes",
@@ -93,6 +124,12 @@ export const tags: Tag[] = [
           "hanlons-razor",
           "fundamental-attribution-error",
           "empathy-gap",
+        ],
+        l3Question: "What might I be getting wrong?",
+        l3Options: [
+          { text: "Assuming bad intent when it's probably just incompetence", modelId: "hanlons-razor" },
+          { text: "Blaming their character when it's really their circumstances", modelId: "fundamental-attribution-error" },
+          { text: "Can't imagine how they feel in their emotional state", modelId: "empathy-gap" },
         ],
       },
       {
@@ -131,10 +168,22 @@ export const tags: Tag[] = [
           "adverse-selection",
           "curse-of-knowledge",
         ],
+        l3Question: "What's the consequence of the information gap?",
+        l3Options: [
+          { text: "It affects negotiation or transaction outcomes", modelId: "information-asymmetry" },
+          { text: "It's attracting the wrong participants", modelId: "adverse-selection" },
+          { text: "I can't communicate what I know effectively", modelId: "curse-of-knowledge" },
+        ],
       },
       {
         text: "I'm working with probabilities or incomplete data",
         modelIds: ["base-rates", "bayes-theorem", "regression-to-the-mean"],
+        l3Question: "What's the probability challenge?",
+        l3Options: [
+          { text: "I need to know the general odds before considering specifics", modelId: "base-rates" },
+          { text: "I need to update my beliefs with new evidence", modelId: "bayes-theorem" },
+          { text: "I'm seeing extreme results that might not persist", modelId: "regression-to-the-mean" },
+        ],
       },
       {
         text: "My mental model might not match reality",
@@ -171,6 +220,12 @@ export const tags: Tag[] = [
       {
         text: "Past investments are clouding current judgment",
         modelIds: ["sunk-cost-fallacy", "commitment-bias", "status-quo-bias"],
+        l3Question: "What's driving the attachment to the current path?",
+        l3Options: [
+          { text: "I've invested too much to walk away", modelId: "sunk-cost-fallacy" },
+          { text: "I made a commitment and feel I must honor it", modelId: "commitment-bias" },
+          { text: "Staying feels safer even if change is better", modelId: "status-quo-bias" },
+        ],
       },
       {
         text: "I need to think through downstream consequences",
@@ -178,6 +233,12 @@ export const tags: Tag[] = [
           "second-order-thinking",
           "second-order-effects",
           "unintended-consequences",
+        ],
+        l3Question: "What's the concern about consequences?",
+        l3Options: [
+          { text: "I need a framework for thinking beyond the immediate", modelId: "second-order-thinking" },
+          { text: "I want to trace the chain of effects from effects", modelId: "second-order-effects" },
+          { text: "I'm worried about outcomes I'm not intending", modelId: "unintended-consequences" },
         ],
       },
       {
@@ -191,6 +252,11 @@ export const tags: Tag[] = [
       {
         text: "The system might break—or get stronger—under stress",
         modelIds: ["antifragile", "phase-transitions"],
+        l3Question: "What's the relationship with stress?",
+        l3Options: [
+          { text: "It could gain from disorder and volatility", modelId: "antifragile" },
+          { text: "It could suddenly shift to a new state", modelId: "phase-transitions" },
+        ],
       },
     ],
     modelIds: [
@@ -218,6 +284,11 @@ export const tags: Tag[] = [
       {
         text: "Actions are about perception or status, not just outcomes",
         modelIds: ["signaling", "mimetic-desire"],
+        l3Question: "What's the signaling dynamic?",
+        l3Options: [
+          { text: "Someone is communicating value or intent through costly actions", modelId: "signaling" },
+          { text: "Someone wants something because others want it", modelId: "mimetic-desire" },
+        ],
       },
       {
         text: "People are following others or deferring to authority",
@@ -226,6 +297,12 @@ export const tags: Tag[] = [
       {
         text: "Give-and-take, liking, or obligation is shaping behavior",
         modelIds: ["reciprocation", "liking-bias", "commitment-bias"],
+        l3Question: "What's the social mechanism?",
+        l3Options: [
+          { text: "Feeling obligated to return favors", modelId: "reciprocation" },
+          { text: "Being influenced because I like them", modelId: "liking-bias" },
+          { text: "Feeling bound by past statements or positions", modelId: "commitment-bias" },
+        ],
       },
       {
         text: "Individual incentives conflict with group outcomes",
@@ -233,6 +310,12 @@ export const tags: Tag[] = [
           "prisoners-dilemma",
           "tragedy-of-the-commons",
           "nash-equilibrium",
+        ],
+        l3Question: "What's the structure of the conflict?",
+        l3Options: [
+          { text: "Two parties, both better off cooperating but tempted to defect", modelId: "prisoners-dilemma" },
+          { text: "Shared resource being depleted by individual use", modelId: "tragedy-of-the-commons" },
+          { text: "Stable state where no one can improve alone", modelId: "nash-equilibrium" },
         ],
       },
     ],
@@ -266,6 +349,12 @@ export const tags: Tag[] = [
           "precautionary-principle",
           "extinction-events",
           "black-swan",
+        ],
+        l3Question: "What's the nature of the catastrophic risk?",
+        l3Options: [
+          { text: "I should act cautiously even without full evidence", modelId: "precautionary-principle" },
+          { text: "This could wipe me out completely—no recovery", modelId: "extinction-events" },
+          { text: "This is a rare, unpredictable, high-impact event", modelId: "black-swan" },
         ],
       },
       {
@@ -349,6 +438,14 @@ export const tags: Tag[] = [
           "economies-of-scale",
           "critical-mass",
         ],
+        l3Question: "What's driving the dominance?",
+        l3Options: [
+          { text: "The distribution is extremely unequal (few giants, many small)", modelId: "power-law" },
+          { text: "Each additional user makes it more valuable for everyone", modelId: "network-effects" },
+          { text: "The market naturally consolidates to one or few winners", modelId: "winner-take-most" },
+          { text: "Bigger players have lower per-unit costs", modelId: "economies-of-scale" },
+          { text: "There's a threshold after which growth becomes self-sustaining", modelId: "critical-mass" },
+        ],
       },
       {
         text: "How complex behavior arises from simple parts",
@@ -357,10 +454,21 @@ export const tags: Tag[] = [
       {
         text: "Building resilience or spreading risk",
         modelIds: ["redundancy", "diversification"],
+        l3Question: "What's the resilience strategy?",
+        l3Options: [
+          { text: "Duplicate critical components so there's backup", modelId: "redundancy" },
+          { text: "Spread bets across uncorrelated outcomes", modelId: "diversification" },
+        ],
       },
       {
         text: "Competitive advantage or market dynamics",
         modelIds: ["economic-moats", "arbitrage", "mr-market"],
+        l3Question: "What's the market dynamic?",
+        l3Options: [
+          { text: "Durable advantage that protects from competition", modelId: "economic-moats" },
+          { text: "Price differences to exploit", modelId: "arbitrage" },
+          { text: "Emotional market behavior creating opportunity", modelId: "mr-market" },
+        ],
       },
       {
         text: "Being stuck in a suboptimal position, or hitting natural limits",
@@ -402,6 +510,12 @@ export const tags: Tag[] = [
       {
         text: "How context or comparison shapes perception",
         modelIds: ["contrast-effect", "anchoring", "framing-effect"],
+        l3Question: "What's shaping the perception?",
+        l3Options: [
+          { text: "A starting number is biasing judgment", modelId: "anchoring" },
+          { text: "Comparison is distorting perception", modelId: "contrast-effect" },
+          { text: "Presentation is changing the reaction", modelId: "framing-effect" },
+        ],
       },
       {
         text: "Why people resist giving something up or changing",
@@ -410,6 +524,13 @@ export const tags: Tag[] = [
           "endowment-effect",
           "default-effect",
           "switching-costs",
+        ],
+        l3Question: "What's the source of the resistance?",
+        l3Options: [
+          { text: "The fear of loss outweighs the potential gain", modelId: "loss-aversion" },
+          { text: "They overvalue it simply because they own it", modelId: "endowment-effect" },
+          { text: "The current option is pre-selected and requires no action", modelId: "default-effect" },
+          { text: "Changing would cost time, money, or effort", modelId: "switching-costs" },
         ],
       },
       {
@@ -480,6 +601,11 @@ export const tags: Tag[] = [
       {
         text: "I need to improve faster or more effectively",
         modelIds: ["deliberate-practice", "desirable-difficulty"],
+        l3Question: "What's the improvement need?",
+        l3Options: [
+          { text: "Structured practice with feedback at my edge", modelId: "deliberate-practice" },
+          { text: "Embracing difficulty that enhances learning", modelId: "desirable-difficulty" },
+        ],
       },
       {
         text: "I'm doubting myself despite evidence I'm capable",
@@ -511,10 +637,20 @@ export const tags: Tag[] = [
       {
         text: "I'm overweighting what's easy to recall or vivid",
         modelIds: ["availability-bias", "survivorship-bias"],
+        l3Question: "What's making it too available?",
+        l3Options: [
+          { text: "Vivid or emotional examples dominate my thinking", modelId: "availability-bias" },
+          { text: "I'm only seeing the winners, not the failures", modelId: "survivorship-bias" },
+        ],
       },
       {
         text: "I'm retrofitting a story onto what happened",
         modelIds: ["hindsight-bias", "narrative-fallacy"],
+        l3Question: "What's the storytelling trap?",
+        l3Options: [
+          { text: "Thinking I knew it all along after learning the outcome", modelId: "hindsight-bias" },
+          { text: "Creating a narrative for what might be random events", modelId: "narrative-fallacy" },
+        ],
       },
       {
         text: "I need to simplify or find the core explanation",
