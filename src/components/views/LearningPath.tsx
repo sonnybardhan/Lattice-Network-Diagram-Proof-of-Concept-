@@ -7,50 +7,76 @@ interface LearningPathProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Graph styles for ego network in learning path
-const graphStyles: any[] = [
+// Neural Constellation graph styles - Learning Path variant
+const graphStyles: cytoscape.StylesheetStyle[] = [
   {
     selector: 'node',
     style: {
-      'background-color': '#6366f1',
+      'background-color': '#8b5cf6',
+      'background-opacity': 0.9,
       'label': 'data(label)',
-      'color': '#1f2937',
+      'color': '#f0f0f5',
       'text-valign': 'bottom',
       'text-halign': 'center',
-      'font-size': '11px',
-      'text-margin-y': 8,
-      'width': 40,
-      'height': 40,
+      'font-size': '10px',
+      'font-family': 'Sora, sans-serif',
+      'font-weight': 500,
+      'text-margin-y': 10,
+      'width': 42,
+      'height': 42,
       'text-wrap': 'wrap',
       'text-max-width': '80px',
-    },
+      'text-outline-color': '#0a0a0f',
+      'text-outline-width': 2,
+      'border-width': 2,
+      'border-color': '#00f5ff',
+      'border-opacity': 0.5,
+      'transition-property': 'background-color, border-color, width, height',
+      'transition-duration': 300,
+    } as any,
   },
   {
     selector: 'node.focus',
     style: {
-      'background-color': '#4f46e5',
-      'width': 60,
-      'height': 60,
-      'font-weight': 'bold',
-      'font-size': '13px',
+      'background-color': '#00f5ff',
+      'background-opacity': 1,
+      'width': 65,
+      'height': 65,
+      'font-weight': 700,
+      'font-size': '12px',
       'border-width': 4,
-      'border-color': '#312e81',
-    },
+      'border-color': '#ffffff',
+      'border-opacity': 1,
+      'text-margin-y': 14,
+    } as any,
   },
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#4338ca',
+      'background-color': '#ff00aa',
+      'border-color': '#ffffff',
+      'border-width': 2,
       'cursor': 'pointer',
-    },
+      'width': 48,
+      'height': 48,
+    } as any,
   },
   {
     selector: 'edge',
     style: {
       'width': 2,
-      'line-color': '#c7d2fe',
+      'line-color': '#8b5cf650',
       'curve-style': 'bezier',
-    },
+      'line-opacity': 0.6,
+    } as any,
+  },
+  {
+    selector: 'edge.highlighted',
+    style: {
+      'width': 3,
+      'line-color': '#00f5ff',
+      'line-opacity': 1,
+    } as any,
   },
 ];
 
@@ -172,16 +198,14 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
   const [completedModels, setCompletedModels] = useState<Set<string>>(new Set());
   const cyRef = useRef<cytoscape.Core | null>(null);
 
-  // Get current model
   const currentModelId = selectedPath.modelSequence[currentIndex];
   const currentModel = useMemo(() => {
     return sampleModels.find((m) => m.id === currentModelId) || null;
   }, [currentModelId]);
 
-  // Get ego network models for current model
   const egoModels = useMemo(() => {
     if (!currentModel) return [];
-    const adjacentIds = currentModel.adjacentModels.slice(0, 4); // Limit to 4 adjacent models
+    const adjacentIds = currentModel.adjacentModels.slice(0, 4);
     const networkModels = [currentModel];
 
     adjacentIds.forEach((adjId) => {
@@ -194,7 +218,6 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
     return networkModels;
   }, [currentModel]);
 
-  // Create Cytoscape elements
   const elements = useMemo(() => {
     if (!currentModel) return [];
 
@@ -219,7 +242,6 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
     return [...nodes, ...edges];
   }, [egoModels, currentModel]);
 
-  // Layout
   const layout = useMemo(
     () => ({
       name: 'concentric',
@@ -236,7 +258,6 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
     [currentModelId]
   );
 
-  // Handle path change
   const handlePathChange = (pathId: string) => {
     const path = sampleLearningPaths.find((p) => p.id === pathId);
     if (path) {
@@ -246,7 +267,6 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
     }
   };
 
-  // Navigation
   const goToNext = () => {
     if (currentIndex < selectedPath.modelSequence.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -264,7 +284,6 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
     goToNext();
   };
 
-  // Handle node click in graph
   useEffect(() => {
     if (cyRef.current) {
       cyRef.current.on('tap', 'node', (evt) => {
@@ -273,27 +292,41 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
           onModelSelect(nodeId);
         }
       });
+
+      cyRef.current.on('mouseover', 'node', (evt) => {
+        evt.target.connectedEdges().addClass('highlighted');
+      });
+
+      cyRef.current.on('mouseout', 'node', (evt) => {
+        evt.target.connectedEdges().removeClass('highlighted');
+      });
     }
 
     return () => {
       if (cyRef.current) {
         cyRef.current.removeListener('tap');
+        cyRef.current.removeListener('mouseover');
+        cyRef.current.removeListener('mouseout');
       }
     };
   }, [currentModelId, onModelSelect]);
 
-  // Progress percentage
   const progressPercentage = ((currentIndex + 1) / selectedPath.modelSequence.length) * 100;
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col">
+    <div className="h-[calc(100vh-120px)] flex flex-col gap-4">
       {/* Path Selector */}
-      <div className="mb-4 flex items-center gap-4">
-        <label className="font-medium text-gray-700">Learning Path:</label>
+      <div className="flex items-center gap-4 flex-wrap">
+        <label className="font-medium" style={{ color: '#a0a0b5' }}>Learning Path:</label>
         <select
           value={selectedPath.id}
           onChange={(e) => handlePathChange(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+          className="px-4 py-2 rounded-xl text-sm"
+          style={{
+            background: 'rgba(26, 26, 46, 0.8)',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            color: '#f0f0f5',
+          }}
         >
           {sampleLearningPaths.map((path) => (
             <option key={path.id} value={path.id}>
@@ -301,25 +334,32 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
             </option>
           ))}
         </select>
-        <p className="text-sm text-gray-500">{selectedPath.description}</p>
+        <p className="text-sm" style={{ color: '#6b6b80' }}>{selectedPath.description}</p>
       </div>
 
       {/* Progress Bar with Model Nodes */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-600">
-            Progress: {currentIndex + 1} of {selectedPath.modelSequence.length}
+      <div className="rounded-xl p-5" style={{
+        background: 'linear-gradient(145deg, rgba(18, 18, 26, 0.9), rgba(26, 26, 46, 0.7))',
+        border: '1px solid rgba(139, 92, 246, 0.25)',
+      }}>
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium" style={{ color: '#a0a0b5' }}>
+            Progress: <span style={{ color: '#00f5ff' }}>{currentIndex + 1}</span> of {selectedPath.modelSequence.length}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm" style={{ color: '#6b6b80' }}>
             {completedModels.size} completed
           </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="h-2 bg-gray-200 rounded-full mb-4">
+        <div className="h-1.5 rounded-full mb-4" style={{ background: 'rgba(139, 92, 246, 0.2)' }}>
           <div
-            className="h-2 bg-indigo-500 rounded-full transition-all duration-300"
-            style={{ width: `${progressPercentage}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{
+              width: `${progressPercentage}%`,
+              background: 'linear-gradient(90deg, #00f5ff, #8b5cf6)',
+              boxShadow: '0 0 10px rgba(0, 245, 255, 0.4)',
+            }}
           />
         </div>
 
@@ -335,18 +375,19 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
               <div key={modelId} className="flex items-center">
                 <button
                   onClick={() => setCurrentIndex(index)}
-                  className={`
-                    relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
-                    transition-all duration-200 cursor-pointer
-                    ${isCurrent
-                      ? 'bg-indigo-600 text-white ring-4 ring-indigo-200'
+                  className="relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 cursor-pointer"
+                  style={{
+                    background: isCurrent
+                      ? 'linear-gradient(135deg, #00f5ff, #8b5cf6)'
                       : isCompleted
-                        ? 'bg-green-500 text-white'
+                        ? '#10b981'
                         : isPast
-                          ? 'bg-indigo-200 text-indigo-700'
-                          : 'bg-gray-200 text-gray-500'
-                    }
-                  `}
+                          ? 'rgba(139, 92, 246, 0.4)'
+                          : 'rgba(36, 36, 56, 0.8)',
+                    color: isCurrent || isCompleted ? '#0a0a0f' : isPast ? '#f0f0f5' : '#6b6b80',
+                    boxShadow: isCurrent ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
+                    border: isCurrent ? '2px solid rgba(255, 255, 255, 0.4)' : '2px solid transparent',
+                  }}
                   title={model?.name || modelId}
                 >
                   {isCompleted ? (
@@ -363,9 +404,12 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
                 </button>
                 {index < selectedPath.modelSequence.length - 1 && (
                   <div
-                    className={`w-6 h-0.5 ${
-                      index < currentIndex ? 'bg-indigo-400' : 'bg-gray-300'
-                    }`}
+                    className="w-6 h-0.5 rounded-full"
+                    style={{
+                      background: index < currentIndex
+                        ? 'linear-gradient(90deg, #00f5ff, #8b5cf6)'
+                        : 'rgba(139, 92, 246, 0.2)',
+                    }}
                   />
                 )}
               </div>
@@ -374,24 +418,40 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
         </div>
 
         {/* Current Model Label */}
-        <div className="mt-2 text-center">
-          <span className="text-sm font-medium text-indigo-600">
+        <div className="mt-3 text-center">
+          <span className="text-sm font-semibold" style={{ color: '#00f5ff' }}>
             {currentModel?.name || 'Unknown Model'}
           </span>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex gap-4">
+      <div className="flex-1 flex gap-5">
         {/* Ego Network Graph */}
-        <div className="w-1/2 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-          <div className="p-3 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-800">Related Models</h2>
-            <p className="text-sm text-gray-500">
+        <div className="w-1/2 relative overflow-hidden" style={{
+          background: 'linear-gradient(145deg, #0a0a0f 0%, #12121a 50%, #1a1a2e 100%)',
+          borderRadius: '24px',
+          border: '1px solid rgba(139, 92, 246, 0.25)',
+        }}>
+          {/* Ambient glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: `
+              radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0, 245, 255, 0.1) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 40% at 20% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)
+            `,
+          }} />
+
+          {/* Header */}
+          <div className="absolute top-0 left-0 right-0 p-4 z-10" style={{
+            background: 'linear-gradient(180deg, rgba(10, 10, 15, 0.95) 0%, transparent 100%)',
+          }}>
+            <h2 className="text-base font-semibold" style={{ color: '#f0f0f5' }}>Related Models</h2>
+            <p className="text-sm" style={{ color: '#6b6b80' }}>
               {currentModel?.name} and its connections
             </p>
           </div>
-          <div className="h-[calc(100%-60px)]">
+
+          <div className="h-full pt-14">
             {elements.length > 0 ? (
               <CytoscapeComponent
                 elements={elements}
@@ -403,7 +463,7 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
                 }}
               />
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
+              <div className="flex items-center justify-center h-full" style={{ color: '#6b6b80' }}>
                 <p>No model data available</p>
               </div>
             )}
@@ -411,22 +471,34 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
         </div>
 
         {/* Model Card */}
-        <div className="w-1/2 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden flex flex-col">
-          <div className="p-3 border-b border-gray-200 bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-800">Model Details</h2>
+        <div className="w-1/2 flex flex-col overflow-hidden" style={{
+          background: 'linear-gradient(145deg, #12121a 0%, #1a1a2e 100%)',
+          borderRadius: '24px',
+          border: '1px solid rgba(139, 92, 246, 0.25)',
+        }}>
+          <div className="p-4 border-b" style={{
+            borderColor: 'rgba(139, 92, 246, 0.2)',
+            background: 'rgba(10, 10, 15, 0.5)',
+          }}>
+            <h2 className="text-base font-semibold" style={{ color: '#f0f0f5' }}>Model Details</h2>
           </div>
 
           {currentModel ? (
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-5">
               {/* Model Name */}
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">{currentModel.name}</h3>
+              <h3 className="text-xl font-bold mb-2 gradient-text">{currentModel.name}</h3>
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {currentModel.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-md"
+                    className="px-2.5 py-1 text-xs font-medium rounded-full"
+                    style={{
+                      background: 'rgba(139, 92, 246, 0.2)',
+                      border: '1px solid rgba(139, 92, 246, 0.4)',
+                      color: '#a78bfa',
+                    }}
                   >
                     {tag.replace(/-/g, ' ')}
                   </span>
@@ -434,32 +506,42 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
               </div>
 
               {/* Diagnostic Question */}
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <div className="mb-5 p-4 rounded-xl" style={{
+                background: 'rgba(0, 245, 255, 0.08)',
+                border: '1px solid rgba(0, 245, 255, 0.2)',
+              }}>
+                <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b6b80' }}>
                   Diagnostic Question
                 </h4>
-                <p className="text-lg text-indigo-700 italic">"{currentModel.diagnosticQuestion}"</p>
+                <p className="text-base font-medium italic" style={{ color: '#00f5ff' }}>
+                  "{currentModel.diagnosticQuestion}"
+                </p>
               </div>
 
               {/* Key Insight */}
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <div className="mb-5">
+                <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b6b80' }}>
                   Key Insight
                 </h4>
-                <p className="text-gray-700 leading-relaxed">{currentModel.keyInsight}</p>
+                <p className="leading-relaxed" style={{ color: '#a0a0b5' }}>{currentModel.keyInsight}</p>
               </div>
 
               {/* Red Flag Phrases */}
               {currentModel.redFlagPhrases.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                <div className="mb-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b6b80' }}>
                     Red Flag Phrases
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {currentModel.redFlagPhrases.map((phrase, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1.5 text-sm bg-red-50 text-red-700 rounded-full border border-red-200"
+                        className="px-3 py-1.5 text-sm rounded-lg"
+                        style={{
+                          background: 'rgba(255, 0, 170, 0.12)',
+                          border: '1px solid rgba(255, 0, 170, 0.3)',
+                          color: '#ff6bcb',
+                        }}
                       >
                         "{phrase}"
                       </span>
@@ -468,9 +550,9 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
                 </div>
               )}
 
-              {/* Adjacent Models Summary */}
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              {/* Adjacent Models */}
+              <div className="mb-5">
+                <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b6b80' }}>
                   Related Models
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -480,7 +562,22 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
                       <button
                         key={adjId}
                         onClick={() => onModelSelect(adjId)}
-                        className="px-3 py-1.5 text-sm bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                        className="px-3 py-1.5 text-sm rounded-lg transition-all duration-300"
+                        style={{
+                          background: 'rgba(139, 92, 246, 0.15)',
+                          border: '1px solid rgba(139, 92, 246, 0.3)',
+                          color: '#a78bfa',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'rgba(0, 245, 255, 0.15)';
+                          e.currentTarget.style.borderColor = 'rgba(0, 245, 255, 0.4)';
+                          e.currentTarget.style.color = '#00f5ff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
+                          e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                          e.currentTarget.style.color = '#a78bfa';
+                        }}
                       >
                         {adjModel?.name || adjId.replace(/-/g, ' ')}
                       </button>
@@ -490,24 +587,27 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center" style={{ color: '#6b6b80' }}>
               <p>Select a model to view details</p>
             </div>
           )}
 
           {/* Navigation Buttons */}
-          <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="p-4 border-t" style={{
+            borderColor: 'rgba(139, 92, 246, 0.2)',
+            background: 'rgba(10, 10, 15, 0.5)',
+          }}>
             <div className="flex items-center justify-between">
               <button
                 onClick={goToPrevious}
                 disabled={currentIndex === 0}
-                className={`
-                  px-4 py-2 rounded-lg font-medium flex items-center gap-2
-                  ${currentIndex === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }
-                `}
+                className="px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all duration-300"
+                style={{
+                  background: currentIndex === 0 ? 'rgba(36, 36, 56, 0.5)' : 'rgba(36, 36, 56, 0.8)',
+                  color: currentIndex === 0 ? '#3d3d52' : '#a0a0b5',
+                  border: '1px solid rgba(139, 92, 246, 0.2)',
+                  cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+                }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -517,7 +617,11 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
 
               <button
                 onClick={markComplete}
-                className="px-6 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all duration-300"
+                style={{
+                  background: '#10b981',
+                  color: '#0a0a0f',
+                }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -528,13 +632,14 @@ export function LearningPath({ onModelSelect }: LearningPathProps) {
               <button
                 onClick={goToNext}
                 disabled={currentIndex === selectedPath.modelSequence.length - 1}
-                className={`
-                  px-4 py-2 rounded-lg font-medium flex items-center gap-2
-                  ${currentIndex === selectedPath.modelSequence.length - 1
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  }
-                `}
+                className="px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all duration-300"
+                style={{
+                  background: currentIndex === selectedPath.modelSequence.length - 1
+                    ? 'rgba(36, 36, 56, 0.5)'
+                    : 'linear-gradient(135deg, #00f5ff, #8b5cf6)',
+                  color: currentIndex === selectedPath.modelSequence.length - 1 ? '#3d3d52' : '#0a0a0f',
+                  cursor: currentIndex === selectedPath.modelSequence.length - 1 ? 'not-allowed' : 'pointer',
+                }}
               >
                 Next
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

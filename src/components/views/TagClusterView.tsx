@@ -7,42 +7,65 @@ interface TagClusterViewProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Graph styles for expanded tag view
-const graphStyles: any[] = [
+// Neural Constellation graph styles - Tag Cluster variant
+const graphStyles: cytoscape.StylesheetStyle[] = [
   {
     selector: 'node',
     style: {
-      'background-color': '#6366f1',
+      'background-color': '#8b5cf6',
+      'background-opacity': 0.9,
       'label': 'data(label)',
-      'color': '#1f2937',
+      'color': '#f0f0f5',
       'text-valign': 'bottom',
       'text-halign': 'center',
       'font-size': '10px',
-      'text-margin-y': 6,
-      'width': 35,
-      'height': 35,
+      'font-family': 'Sora, sans-serif',
+      'font-weight': 500,
+      'text-margin-y': 8,
+      'width': 38,
+      'height': 38,
       'text-wrap': 'wrap',
-      'text-max-width': '70px',
-    },
+      'text-max-width': '75px',
+      'text-outline-color': '#0a0a0f',
+      'text-outline-width': 2,
+      'border-width': 2,
+      'border-color': '#00f5ff',
+      'border-opacity': 0.4,
+      'transition-property': 'background-color, border-color, width, height',
+      'transition-duration': 250,
+    } as any,
   },
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#4338ca',
+      'background-color': '#00f5ff',
+      'border-color': '#ffffff',
+      'border-width': 2,
       'cursor': 'pointer',
-    },
+      'width': 44,
+      'height': 44,
+    } as any,
   },
   {
     selector: 'edge',
     style: {
       'width': 1.5,
-      'line-color': '#d1d5db',
+      'line-color': '#8b5cf640',
       'curve-style': 'bezier',
-    },
+      'line-opacity': 0.5,
+    } as any,
+  },
+  {
+    selector: 'edge.highlighted',
+    style: {
+      'width': 3,
+      'line-color': '#00f5ff',
+      'line-opacity': 1,
+    } as any,
   },
 ];
 
-// Sample tags data - representing all 12 tags from specification
+// Sample tags data
 const sampleTags: Tag[] = [
   {
     id: 'decision-prioritization',
@@ -178,7 +201,7 @@ const sampleTags: Tag[] = [
   },
 ];
 
-// Sample models for the expanded view
+// Sample models for expanded view
 const sampleModels: MentalModel[] = [
   { id: 'eisenhower-matrix', name: 'Eisenhower Matrix', tags: ['decision-prioritization'], diagnosticQuestion: 'What should I focus on first?', keyInsight: 'Separate urgent from important.', redFlagPhrases: [], adjacentModels: ['pareto-principle', 'opportunity-cost'], whyAdjacent: {} },
   { id: 'pareto-principle', name: 'Pareto Principle', tags: ['decision-prioritization'], diagnosticQuestion: 'Which 20% drives 80% of results?', keyInsight: 'Outcomes are rarely evenly distributed.', redFlagPhrases: [], adjacentModels: ['eisenhower-matrix', 'leverage-points'], whyAdjacent: {} },
@@ -194,28 +217,28 @@ const sampleModels: MentalModel[] = [
   { id: 'loss-aversion', name: 'Loss Aversion', tags: ['experience-perception'], diagnosticQuestion: 'Am I overweighting potential losses?', keyInsight: 'Losses loom larger than equivalent gains.', redFlagPhrases: [], adjacentModels: ['endowment-effect', 'sunk-cost-fallacy'], whyAdjacent: {} },
 ];
 
-// Tag color mapping
-const tagColors: Record<string, { bg: string; text: string; border: string; light: string }> = {
-  'decision-prioritization': { bg: 'bg-indigo-500', text: 'text-indigo-700', border: 'border-indigo-200', light: 'bg-indigo-50' },
-  'unexpected-behavior': { bg: 'bg-amber-500', text: 'text-amber-700', border: 'border-amber-200', light: 'bg-amber-50' },
-  'incomplete-information': { bg: 'bg-blue-500', text: 'text-blue-700', border: 'border-blue-200', light: 'bg-blue-50' },
-  'change-disruption': { bg: 'bg-orange-500', text: 'text-orange-700', border: 'border-orange-200', light: 'bg-orange-50' },
-  'social-dynamics': { bg: 'bg-pink-500', text: 'text-pink-700', border: 'border-pink-200', light: 'bg-pink-50' },
-  'risk-uncertainty': { bg: 'bg-red-500', text: 'text-red-700', border: 'border-red-200', light: 'bg-red-50' },
-  'resource-management': { bg: 'bg-green-500', text: 'text-green-700', border: 'border-green-200', light: 'bg-green-50' },
-  'systems-growth': { bg: 'bg-purple-500', text: 'text-purple-700', border: 'border-purple-200', light: 'bg-purple-50' },
-  'experience-perception': { bg: 'bg-cyan-500', text: 'text-cyan-700', border: 'border-cyan-200', light: 'bg-cyan-50' },
-  'competition-strategy': { bg: 'bg-rose-500', text: 'text-rose-700', border: 'border-rose-200', light: 'bg-rose-50' },
-  'personal-performance': { bg: 'bg-teal-500', text: 'text-teal-700', border: 'border-teal-200', light: 'bg-teal-50' },
-  'thinking-clearly': { bg: 'bg-violet-500', text: 'text-violet-700', border: 'border-violet-200', light: 'bg-violet-50' },
+// Tag color mapping - vibrant cosmic colors
+const tagColors: Record<string, { accent: string; glow: string; bg: string }> = {
+  'decision-prioritization': { accent: '#00f5ff', glow: 'rgba(0, 245, 255, 0.3)', bg: 'rgba(0, 245, 255, 0.1)' },
+  'unexpected-behavior': { accent: '#ffa500', glow: 'rgba(255, 165, 0, 0.3)', bg: 'rgba(255, 165, 0, 0.1)' },
+  'incomplete-information': { accent: '#4da6ff', glow: 'rgba(77, 166, 255, 0.3)', bg: 'rgba(77, 166, 255, 0.1)' },
+  'change-disruption': { accent: '#ff6b35', glow: 'rgba(255, 107, 53, 0.3)', bg: 'rgba(255, 107, 53, 0.1)' },
+  'social-dynamics': { accent: '#ff00aa', glow: 'rgba(255, 0, 170, 0.3)', bg: 'rgba(255, 0, 170, 0.1)' },
+  'risk-uncertainty': { accent: '#ff4757', glow: 'rgba(255, 71, 87, 0.3)', bg: 'rgba(255, 71, 87, 0.1)' },
+  'resource-management': { accent: '#10b981', glow: 'rgba(16, 185, 129, 0.3)', bg: 'rgba(16, 185, 129, 0.1)' },
+  'systems-growth': { accent: '#8b5cf6', glow: 'rgba(139, 92, 246, 0.3)', bg: 'rgba(139, 92, 246, 0.1)' },
+  'experience-perception': { accent: '#06b6d4', glow: 'rgba(6, 182, 212, 0.3)', bg: 'rgba(6, 182, 212, 0.1)' },
+  'competition-strategy': { accent: '#f43f5e', glow: 'rgba(244, 63, 94, 0.3)', bg: 'rgba(244, 63, 94, 0.1)' },
+  'personal-performance': { accent: '#14b8a6', glow: 'rgba(20, 184, 166, 0.3)', bg: 'rgba(20, 184, 166, 0.1)' },
+  'thinking-clearly': { accent: '#a78bfa', glow: 'rgba(167, 139, 250, 0.3)', bg: 'rgba(167, 139, 250, 0.1)' },
 };
 
 export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
   const [expandedTag, setExpandedTag] = useState<Tag | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredTag, setHoveredTag] = useState<string | null>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
 
-  // Filter tags based on search
   const filteredTags = useMemo(() => {
     if (!searchQuery.trim()) return sampleTags;
     const query = searchQuery.toLowerCase();
@@ -227,13 +250,11 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
     );
   }, [searchQuery]);
 
-  // Get models for expanded tag
   const expandedModels = useMemo(() => {
     if (!expandedTag) return [];
     return sampleModels.filter((m) => expandedTag.modelIds.includes(m.id));
   }, [expandedTag]);
 
-  // Create Cytoscape elements for expanded view
   const expandedElements = useMemo(() => {
     if (!expandedTag) return [];
 
@@ -244,16 +265,12 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
       },
     }));
 
-    // Create a set of model IDs that actually have nodes in the graph
     const nodeIds = new Set(expandedModels.map((m) => m.id));
-
-    // Create edges based on adjacentModels
     const edges: cytoscape.ElementDefinition[] = [];
     const addedEdges = new Set<string>();
 
     expandedModels.forEach((model) => {
       model.adjacentModels.forEach((adjId) => {
-        // Only create edge if target node actually exists in the graph
         if (nodeIds.has(adjId)) {
           const edgeKey = [model.id, adjId].sort().join('-');
           if (!addedEdges.has(edgeKey)) {
@@ -273,25 +290,23 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
     return [...nodes, ...edges];
   }, [expandedTag, expandedModels]);
 
-  // Layout for expanded view
   const expandedLayout = useMemo(
     () => ({
       name: 'cose',
-      idealEdgeLength: 80,
+      idealEdgeLength: 90,
       nodeOverlap: 20,
       fit: true,
-      padding: 30,
+      padding: 35,
       randomize: false,
-      componentSpacing: 80,
-      nodeRepulsion: 400000,
+      componentSpacing: 90,
+      nodeRepulsion: 450000,
       edgeElasticity: 100,
       animate: true,
-      animationDuration: 400,
+      animationDuration: 500,
     }),
     []
   );
 
-  // Handle model click in expanded view
   useEffect(() => {
     if (cyRef.current) {
       cyRef.current.on('tap', 'node', (evt) => {
@@ -308,63 +323,110 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
   }, [onModelSelect, expandedTag]);
 
   const getTagColor = (tagId: string) => {
-    return tagColors[tagId] || { bg: 'bg-gray-500', text: 'text-gray-700', border: 'border-gray-200', light: 'bg-gray-50' };
+    return tagColors[tagId] || { accent: '#8b5cf6', glow: 'rgba(139, 92, 246, 0.3)', bg: 'rgba(139, 92, 246, 0.1)' };
   };
 
   return (
     <div className="h-[calc(100vh-120px)]">
       {/* Search Bar */}
-      <div className="mb-4">
+      <div className="mb-6">
         <div className="relative max-w-md">
           <input
             type="text"
             placeholder="Search tags or models..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full pl-12 pr-4 py-3 rounded-xl text-sm"
+            style={{
+              background: 'rgba(26, 26, 46, 0.8)',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
+              color: '#f0f0f5',
+            }}
           />
           <svg
-            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+            className="absolute left-4 top-3.5 h-5 w-5"
+            style={{ color: '#6b6b80' }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
       </div>
 
       {/* Tag Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filteredTags.map((tag) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {filteredTags.map((tag, index) => {
           const colors = getTagColor(tag.id);
+          const isHovered = hoveredTag === tag.id;
+
           return (
             <div
               key={tag.id}
-              className={`bg-white rounded-lg shadow-md border ${colors.border} hover:shadow-lg transition-shadow cursor-pointer overflow-hidden`}
+              className="relative overflow-hidden cursor-pointer transition-all duration-300 animate-fade-in-up"
+              style={{
+                background: isHovered
+                  ? `linear-gradient(145deg, ${colors.bg}, rgba(26, 26, 46, 0.9))`
+                  : 'linear-gradient(145deg, rgba(18, 18, 26, 0.9), rgba(26, 26, 46, 0.7))',
+                borderRadius: '20px',
+                border: `1px solid ${isHovered ? colors.accent : 'rgba(139, 92, 246, 0.2)'}`,
+                boxShadow: isHovered ? `0 0 30px ${colors.glow}` : 'none',
+                transform: isHovered ? 'translateY(-4px)' : 'none',
+                animationDelay: `${index * 0.05}s`,
+              }}
               onClick={() => setExpandedTag(tag)}
+              onMouseEnter={() => setHoveredTag(tag.id)}
+              onMouseLeave={() => setHoveredTag(null)}
             >
-              <div className={`h-2 ${colors.bg}`} />
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className={`font-semibold ${colors.text}`}>{tag.name}</h3>
-                  <span className={`px-2 py-0.5 text-xs font-medium ${colors.light} ${colors.text} rounded-full`}>
+              {/* Accent bar */}
+              <div className="h-1 transition-all duration-300" style={{
+                background: isHovered ? colors.accent : `linear-gradient(90deg, ${colors.accent}50, transparent)`,
+                boxShadow: isHovered ? `0 0 20px ${colors.accent}` : 'none',
+              }} />
+
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="font-semibold text-base transition-colors duration-300" style={{
+                    color: isHovered ? colors.accent : '#f0f0f5',
+                  }}>
+                    {tag.name}
+                  </h3>
+                  <span className="px-2.5 py-1 text-xs font-semibold rounded-full" style={{
+                    background: colors.bg,
+                    color: colors.accent,
+                    border: `1px solid ${colors.accent}40`,
+                  }}>
                     {tag.modelIds.length}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 line-clamp-2">{tag.l1Question}</p>
-                <div className="mt-3 flex items-center text-xs text-gray-500">
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                <p className="text-sm leading-relaxed line-clamp-2" style={{ color: '#a0a0b5' }}>
+                  {tag.l1Question}
+                </p>
+
+                <div className="mt-4 flex items-center text-xs font-medium transition-colors duration-300" style={{
+                  color: isHovered ? colors.accent : '#6b6b80',
+                }}>
+                  <span>Explore models</span>
+                  <svg
+                    className="w-4 h-4 ml-1 transition-transform duration-300"
+                    style={{ transform: isHovered ? 'translateX(4px)' : 'none' }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  Click to explore
                 </div>
               </div>
+
+              {/* Ambient glow */}
+              {isHovered && (
+                <div className="absolute inset-0 pointer-events-none" style={{
+                  background: `radial-gradient(circle at 50% 0%, ${colors.glow}, transparent 70%)`,
+                }} />
+              )}
             </div>
           );
         })}
@@ -372,22 +434,45 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
 
       {/* Expanded Tag Modal */}
       {expandedTag && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{
+          background: 'rgba(10, 10, 15, 0.9)',
+          backdropFilter: 'blur(8px)',
+        }}>
+          <div className="w-full max-w-5xl max-h-[90vh] overflow-hidden animate-scale-in" style={{
+            background: 'linear-gradient(145deg, #12121a, #1a1a2e)',
+            borderRadius: '28px',
+            border: `1px solid ${getTagColor(expandedTag.id).accent}40`,
+            boxShadow: `0 0 60px ${getTagColor(expandedTag.id).glow}`,
+          }}>
             {/* Modal Header */}
-            <div className={`p-4 ${getTagColor(expandedTag.id).light} border-b`}>
+            <div className="p-6 border-b" style={{
+              borderColor: 'rgba(139, 92, 246, 0.2)',
+              background: getTagColor(expandedTag.id).bg,
+            }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className={`text-xl font-bold ${getTagColor(expandedTag.id).text}`}>
+                  <h2 className="text-2xl font-bold" style={{ color: getTagColor(expandedTag.id).accent }}>
                     {expandedTag.name}
                   </h2>
-                  <p className="text-sm text-gray-600 mt-1">{expandedTag.l1Question}</p>
+                  <p className="text-sm mt-1" style={{ color: '#a0a0b5' }}>{expandedTag.l1Question}</p>
                 </div>
                 <button
                   onClick={() => setExpandedTag(null)}
-                  className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                  className="p-2 rounded-xl transition-all duration-300"
+                  style={{
+                    background: 'rgba(36, 36, 56, 0.8)',
+                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#ff4757';
+                    e.currentTarget.style.background = 'rgba(255, 71, 87, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                    e.currentTarget.style.background = 'rgba(36, 36, 56, 0.8)';
+                  }}
                 >
-                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" style={{ color: '#a0a0b5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -397,7 +482,14 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
             {/* Modal Body */}
             <div className="flex h-[60vh]">
               {/* Graph View */}
-              <div className="w-1/2 border-r border-gray-200">
+              <div className="w-1/2 relative" style={{ borderRight: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                {/* Ambient glow */}
+                <div className="absolute inset-0 pointer-events-none" style={{
+                  background: `
+                    radial-gradient(ellipse 60% 40% at 50% 50%, ${getTagColor(expandedTag.id).glow}, transparent 60%)
+                  `,
+                }} />
+
                 {expandedElements.length > 0 ? (
                   <CytoscapeComponent
                     elements={expandedElements}
@@ -406,10 +498,18 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
                     layout={expandedLayout}
                     cy={(cy) => {
                       cyRef.current = cy;
+
+                      cy.on('mouseover', 'node', (evt) => {
+                        evt.target.connectedEdges().addClass('highlighted');
+                      });
+
+                      cy.on('mouseout', 'node', (evt) => {
+                        evt.target.connectedEdges().removeClass('highlighted');
+                      });
                     }}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
+                  <div className="flex items-center justify-center h-full" style={{ color: '#6b6b80' }}>
                     <p>No models available for visualization</p>
                   </div>
                 )}
@@ -417,8 +517,8 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
 
               {/* Model List */}
               <div className="w-1/2 overflow-y-auto">
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-700 mb-3">
+                <div className="p-5">
+                  <h3 className="font-semibold mb-4" style={{ color: '#a0a0b5' }}>
                     Models in this category ({expandedTag.modelIds.length})
                   </h3>
                   <div className="space-y-2">
@@ -427,22 +527,36 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
                       return (
                         <div
                           key={modelId}
-                          className="p-3 bg-gray-50 rounded-lg hover:bg-indigo-50 cursor-pointer transition-colors border border-gray-100 hover:border-indigo-200"
+                          className="p-4 rounded-xl cursor-pointer transition-all duration-300"
+                          style={{
+                            background: 'rgba(36, 36, 56, 0.5)',
+                            border: '1px solid rgba(139, 92, 246, 0.15)',
+                          }}
                           onClick={() => {
                             setExpandedTag(null);
                             onModelSelect(modelId);
                           }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = getTagColor(expandedTag.id).bg;
+                            e.currentTarget.style.borderColor = getTagColor(expandedTag.id).accent;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(36, 36, 56, 0.5)';
+                            e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.15)';
+                          }}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium" style={{ color: '#f0f0f5' }}>
                               {model?.name || modelId.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
                             </span>
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" style={{ color: '#6b6b80' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </div>
                           {model?.diagnosticQuestion && (
-                            <p className="text-sm text-gray-500 mt-1 italic">"{model.diagnosticQuestion}"</p>
+                            <p className="text-sm mt-1 italic" style={{ color: getTagColor(expandedTag.id).accent }}>
+                              "{model.diagnosticQuestion}"
+                            </p>
                           )}
                         </div>
                       );
@@ -453,14 +567,17 @@ export function TagClusterView({ onModelSelect }: TagClusterViewProps) {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <div className="p-5 border-t" style={{
+              borderColor: 'rgba(139, 92, 246, 0.2)',
+              background: 'rgba(10, 10, 15, 0.5)',
+            }}>
               <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm" style={{ color: '#6b6b80' }}>
                   Click on any model to explore its network
                 </p>
                 <button
                   onClick={() => setExpandedTag(null)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="px-5 py-2.5 rounded-xl font-medium transition-all duration-300 btn-secondary"
                 >
                   Close
                 </button>

@@ -8,63 +8,83 @@ interface EgoNetworkProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Graph styles for Cytoscape - concentric layout optimized
-const graphStyles: any[] = [
+// Neural Constellation graph styles - Ego Network variant
+const graphStyles: cytoscape.StylesheetStyle[] = [
   {
     selector: 'node',
     style: {
-      'background-color': '#6366f1',
+      'background-color': '#8b5cf6',
+      'background-opacity': 0.9,
       'label': 'data(label)',
-      'color': '#1f2937',
+      'color': '#f0f0f5',
       'text-valign': 'bottom',
       'text-halign': 'center',
       'font-size': '11px',
-      'text-margin-y': 8,
-      'width': 45,
-      'height': 45,
+      'font-family': 'Sora, sans-serif',
+      'font-weight': 500,
+      'text-margin-y': 12,
+      'width': 48,
+      'height': 48,
       'text-wrap': 'wrap',
-      'text-max-width': '80px',
-    },
+      'text-max-width': '85px',
+      'text-outline-color': '#0a0a0f',
+      'text-outline-width': 2,
+      'border-width': 2,
+      'border-color': '#00f5ff',
+      'border-opacity': 0.5,
+      'transition-property': 'background-color, border-color, width, height, border-width',
+      'transition-duration': 300,
+    } as any,
   },
   {
     selector: 'node.focus',
     style: {
-      'background-color': '#4f46e5',
-      'width': 70,
-      'height': 70,
-      'font-weight': 'bold',
-      'font-size': '13px',
+      'background-color': '#00f5ff',
+      'background-opacity': 1,
+      'width': 80,
+      'height': 80,
+      'font-weight': 700,
+      'font-size': '14px',
       'border-width': 4,
-      'border-color': '#312e81',
-      'text-margin-y': 12,
-    },
+      'border-color': '#ffffff',
+      'border-opacity': 1,
+      'text-margin-y': 16,
+    } as any,
   },
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#4338ca',
+      'background-color': '#ff00aa',
+      'border-color': '#ffffff',
+      'border-width': 3,
       'cursor': 'pointer',
-    },
+      'width': 56,
+      'height': 56,
+    } as any,
   },
   {
     selector: 'edge',
     style: {
       'width': 2,
-      'line-color': '#c7d2fe',
+      'line-color': '#8b5cf650',
       'curve-style': 'bezier',
       'target-arrow-shape': 'none',
-    },
+      'line-opacity': 0.7,
+      'transition-property': 'line-color, width, line-opacity',
+      'transition-duration': 300,
+    } as any,
   },
   {
     selector: 'edge.highlighted',
     style: {
-      'width': 3,
-      'line-color': '#818cf8',
-    },
+      'width': 4,
+      'line-color': '#00f5ff',
+      'line-opacity': 1,
+    } as any,
   },
 ];
 
-// Sample models data - comprehensive set for ego network demonstration
+// Sample models data
 const sampleModels: MentalModel[] = [
   {
     id: 'first-principles',
@@ -215,13 +235,12 @@ const sampleModels: MentalModel[] = [
 export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
   const cyRef = useRef<cytoscape.Core | null>(null);
   const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
+  const [hoveredModel, setHoveredModel] = useState<string | null>(null);
 
-  // Get the focus model
   const focusModel = useMemo(() => {
     return sampleModels.find((m) => m.id === modelId) || sampleModels[0];
   }, [modelId]);
 
-  // Get ego network - focus model + adjacent models
   const egoModels = useMemo(() => {
     const adjacentIds = focusModel.adjacentModels;
     const networkModels = [focusModel];
@@ -236,7 +255,6 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
     return networkModels;
   }, [focusModel]);
 
-  // Convert to Cytoscape elements
   const elements = useMemo(() => {
     const nodes: cytoscape.ElementDefinition[] = egoModels.map((model) => ({
       data: {
@@ -246,10 +264,9 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
       classes: model.id === focusModel.id ? 'focus' : '',
     }));
 
-    // Create edges from focus model to adjacent models
     const edges: cytoscape.ElementDefinition[] = focusModel.adjacentModels
       .filter((adjId) => egoModels.some((m) => m.id === adjId))
-      .map((adjId, i) => ({
+      .map((adjId) => ({
         data: {
           id: `edge-${focusModel.id}-${adjId}`,
           source: focusModel.id,
@@ -260,7 +277,6 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
     return [...nodes, ...edges];
   }, [egoModels, focusModel]);
 
-  // Concentric layout - focus in center
   const layout = useMemo(
     () => ({
       name: 'concentric',
@@ -268,25 +284,22 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
         return node.id() === focusModel.id ? 2 : 1;
       },
       levelWidth: () => 1,
-      minNodeSpacing: 60,
+      minNodeSpacing: 70,
       animate: true,
-      animationDuration: 500,
+      animationDuration: 600,
+      animationEasing: 'ease-out-cubic',
       fit: true,
-      padding: 50,
+      padding: 60,
     }),
     [focusModel.id]
   );
 
-  // Handle interactions
   useEffect(() => {
     if (cyRef.current) {
       const cy = cyRef.current;
-
-      // Highlight focus node
       cy.nodes().removeClass('focus');
       cy.$(`#${focusModel.id}`).addClass('focus');
 
-      // Node click handler
       cy.on('tap', 'node', (evt) => {
         const nodeId = evt.target.id();
         if (nodeId !== focusModel.id) {
@@ -303,16 +316,43 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
   }, [focusModel.id, onModelSelect]);
 
   return (
-    <div className="flex h-[calc(100vh-120px)] gap-4">
-      {/* Graph Container - Left Side */}
-      <div className="w-1/2 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-        <div className="p-3 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-800">Ego Network</h2>
-          <p className="text-sm text-gray-500">
-            {focusModel.name} and {egoModels.length - 1} connected models
+    <div className="flex h-[calc(100vh-120px)] gap-6">
+      {/* Graph Container */}
+      <div className="w-1/2 relative overflow-hidden" style={{
+        background: 'linear-gradient(145deg, #0a0a0f 0%, #12121a 50%, #1a1a2e 100%)',
+        borderRadius: '24px',
+        border: '1px solid rgba(139, 92, 246, 0.25)',
+      }}>
+        {/* Ambient glow effects */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: `
+            radial-gradient(ellipse 80% 50% at 50% 50%, rgba(0, 245, 255, 0.12) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 40% at 80% 20%, rgba(255, 0, 170, 0.08) 0%, transparent 50%)
+          `,
+        }} />
+
+        {/* Header */}
+        <div className="absolute top-0 left-0 right-0 p-5 z-10" style={{
+          background: 'linear-gradient(180deg, rgba(10, 10, 15, 0.95) 0%, transparent 100%)',
+        }}>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full animate-pulse" style={{
+              background: '#00f5ff',
+              boxShadow: '0 0 12px #00f5ff, 0 0 24px rgba(0, 245, 255, 0.5)',
+            }} />
+            <h2 className="text-lg font-semibold" style={{ color: '#f0f0f5' }}>
+              Ego Network
+            </h2>
+          </div>
+          <p className="text-sm mt-1" style={{ color: '#a0a0b5' }}>
+            <span className="font-medium" style={{ color: '#00f5ff' }}>{focusModel.name}</span>
+            {' '}and {egoModels.length - 1} connected models
           </p>
         </div>
-        <div className="h-[calc(100%-60px)]">
+
+        {/* Graph */}
+        <div className="h-full pt-16">
           <CytoscapeComponent
             elements={elements}
             style={{ width: '100%', height: '100%' }}
@@ -320,26 +360,65 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
             layout={layout}
             cy={(cy) => {
               cyRef.current = cy;
+
+              cy.on('mouseover', 'node', (evt) => {
+                const node = evt.target;
+                setHoveredModel(node.id());
+                node.connectedEdges().addClass('highlighted');
+              });
+
+              cy.on('mouseout', 'node', () => {
+                setHoveredModel(null);
+                cy.edges().removeClass('highlighted');
+              });
             }}
           />
         </div>
+
+        {/* Floating interaction hint */}
+        {hoveredModel && hoveredModel !== focusModel.id && (
+          <div className="absolute bottom-4 left-4 px-4 py-2 rounded-xl text-sm font-medium animate-fade-in-up" style={{
+            background: 'rgba(0, 245, 255, 0.15)',
+            border: '1px solid rgba(0, 245, 255, 0.4)',
+            color: '#00f5ff',
+            backdropFilter: 'blur(10px)',
+          }}>
+            Click to explore {sampleModels.find(m => m.id === hoveredModel)?.name}
+          </div>
+        )}
       </div>
 
-      {/* Model Card Panel - Right Side */}
-      <div className="w-1/2 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-        <div className="p-3 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-800">Model Details</h2>
+      {/* Model Details Panel */}
+      <div className="w-1/2 overflow-hidden" style={{
+        background: 'linear-gradient(145deg, #12121a 0%, #1a1a2e 100%)',
+        borderRadius: '24px',
+        border: '1px solid rgba(139, 92, 246, 0.25)',
+      }}>
+        {/* Panel Header */}
+        <div className="p-5 border-b" style={{ borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" style={{ color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <h2 className="text-lg font-semibold" style={{ color: '#f0f0f5' }}>Model Details</h2>
+          </div>
         </div>
-        <div className="overflow-y-auto h-[calc(100%-60px)] p-6">
+
+        <div className="overflow-y-auto h-[calc(100%-70px)] p-6">
           {/* Model Name */}
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">{focusModel.name}</h3>
+          <h3 className="text-2xl font-bold mb-3 gradient-text">{focusModel.name}</h3>
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 mb-6">
             {focusModel.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-md"
+                className="px-3 py-1 text-xs font-medium rounded-full"
+                style={{
+                  background: 'rgba(139, 92, 246, 0.2)',
+                  border: '1px solid rgba(139, 92, 246, 0.4)',
+                  color: '#a78bfa',
+                }}
               >
                 {tag.replace(/-/g, ' ')}
               </span>
@@ -347,31 +426,41 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
           </div>
 
           {/* Diagnostic Question */}
-          <div className="mb-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <div className="mb-6 p-4 rounded-xl" style={{
+            background: 'rgba(0, 245, 255, 0.08)',
+            border: '1px solid rgba(0, 245, 255, 0.2)',
+          }}>
+            <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b6b80' }}>
               Diagnostic Question
             </h4>
-            <p className="text-lg text-indigo-700 italic">"{focusModel.diagnosticQuestion}"</p>
+            <p className="text-lg font-medium italic" style={{ color: '#00f5ff' }}>
+              "{focusModel.diagnosticQuestion}"
+            </p>
           </div>
 
           {/* Key Insight */}
           <div className="mb-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#6b6b80' }}>
               Key Insight
             </h4>
-            <p className="text-gray-700 leading-relaxed">{focusModel.keyInsight}</p>
+            <p className="leading-relaxed" style={{ color: '#a0a0b5' }}>{focusModel.keyInsight}</p>
           </div>
 
           {/* Red Flag Phrases */}
           <div className="mb-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#6b6b80' }}>
               Red Flag Phrases
             </h4>
             <div className="flex flex-wrap gap-2">
               {focusModel.redFlagPhrases.map((phrase, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1.5 text-sm bg-red-50 text-red-700 rounded-full border border-red-200"
+                  className="px-3 py-1.5 text-sm rounded-lg"
+                  style={{
+                    background: 'rgba(255, 0, 170, 0.12)',
+                    border: '1px solid rgba(255, 0, 170, 0.3)',
+                    color: '#ff6bcb',
+                  }}
                 >
                   "{phrase}"
                 </span>
@@ -379,41 +468,49 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
             </div>
           </div>
 
-          {/* Adjacent Models */}
+          {/* Connected Models */}
           <div className="mb-6">
-            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#6b6b80' }}>
               Connected Models
             </h4>
             <div className="space-y-3">
               {focusModel.adjacentModels.map((adjId) => {
                 const adjModel = sampleModels.find((m) => m.id === adjId);
                 const whyAdjacent = focusModel.whyAdjacent[adjId];
+                const isHovered = hoveredModel === adjId;
+
                 return (
                   <div
                     key={adjId}
-                    className="p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 cursor-pointer transition-colors"
+                    className="p-4 rounded-xl cursor-pointer transition-all duration-300"
+                    style={{
+                      background: isHovered ? 'rgba(0, 245, 255, 0.1)' : 'rgba(36, 36, 56, 0.5)',
+                      border: `1px solid ${isHovered ? 'rgba(0, 245, 255, 0.5)' : 'rgba(139, 92, 246, 0.2)'}`,
+                      transform: isHovered ? 'translateX(4px)' : 'none',
+                    }}
                     onClick={() => onModelSelect(adjId)}
+                    onMouseEnter={() => setHoveredModel(adjId)}
+                    onMouseLeave={() => setHoveredModel(null)}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium" style={{ color: isHovered ? '#00f5ff' : '#f0f0f5' }}>
                         {adjModel?.name || adjId.replace(/-/g, ' ')}
                       </span>
                       <svg
-                        className="w-4 h-4 text-gray-400"
+                        className="w-4 h-4 transition-transform duration-300"
+                        style={{
+                          color: isHovered ? '#00f5ff' : '#6b6b80',
+                          transform: isHovered ? 'translateX(4px)' : 'none',
+                        }}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
                     {whyAdjacent && (
-                      <p className="mt-1 text-sm text-gray-600">{whyAdjacent}</p>
+                      <p className="mt-1.5 text-sm" style={{ color: '#a0a0b5' }}>{whyAdjacent}</p>
                     )}
                   </div>
                 );
@@ -421,27 +518,12 @@ export function EgoNetwork({ modelId, onModelSelect }: EgoNetworkProps) {
             </div>
           </div>
 
-          {/* Practice Button */}
-          <div className="pt-4 border-t border-gray-200">
-            <button className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+          {/* Action Button */}
+          <div className="pt-4 border-t" style={{ borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+            <button className="w-full py-3.5 px-4 font-semibold rounded-xl flex items-center justify-center gap-2 transition-all duration-300 btn-primary">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Practice with Scenario
             </button>

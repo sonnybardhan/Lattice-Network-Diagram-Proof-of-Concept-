@@ -1,12 +1,357 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Neural Constellation - Dark Cosmic Theme */
+  --void-black: #0a0a0f;
+  --deep-space: #12121a;
+  --nebula-dark: #1a1a2e;
+  --nebula-mid: #242438;
+  --nebula-light: #2d2d44;
+
+  /* Luminous accent colors */
+  --neuron-cyan: #00f5ff;
+  --neuron-cyan-dim: #00f5ff40;
+  --neuron-magenta: #ff00aa;
+  --neuron-magenta-dim: #ff00aa40;
+  --neuron-gold: #ffd700;
+  --neuron-gold-dim: #ffd70040;
+  --synapse-purple: #8b5cf6;
+  --synapse-purple-dim: #8b5cf640;
+  --thought-green: #10b981;
+  --thought-green-dim: #10b98140;
+
+  /* Text colors */
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b5;
+  --text-tertiary: #6b6b80;
+
+  /* Gradients */
+  --gradient-neuron: linear-gradient(135deg, var(--neuron-cyan), var(--synapse-purple));
+  --gradient-synapse: linear-gradient(90deg, var(--neuron-cyan-dim), var(--synapse-purple-dim));
+  --gradient-glow: radial-gradient(circle, var(--neuron-cyan-dim) 0%, transparent 70%);
+
+  /* Shadows & Glows */
+  --glow-cyan: 0 0 20px var(--neuron-cyan-dim), 0 0 40px var(--neuron-cyan-dim);
+  --glow-magenta: 0 0 20px var(--neuron-magenta-dim), 0 0 40px var(--neuron-magenta-dim);
+  --glow-purple: 0 0 20px var(--synapse-purple-dim), 0 0 40px var(--synapse-purple-dim);
+  --shadow-deep: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--void-black);
+  color: var(--text-primary);
+}
+
+/* Noise texture overlay for depth */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Code/monospace elements */
+code, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--nebula-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--nebula-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--synapse-purple);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px var(--neuron-cyan-dim));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px var(--neuron-cyan)) drop-shadow(0 0 30px var(--neuron-cyan-dim));
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utilities */
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* Glass morphism cards */
+.glass-card {
+  background: rgba(26, 26, 46, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+}
+
+.glass-card-hover {
+  transition: all 0.3s ease;
+}
+
+.glass-card-hover:hover {
+  background: rgba(36, 36, 56, 0.8);
+  border-color: var(--neuron-cyan);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: var(--gradient-neuron);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glowing borders */
+.glow-border {
+  position: relative;
+}
+
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--gradient-neuron);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-border:hover::before {
+  opacity: 1;
+  filter: blur(8px);
+}
+
+/* Neural network background pattern */
+.neural-bg {
+  background-image:
+    radial-gradient(circle at 20% 80%, var(--neuron-cyan-dim) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--synapse-purple-dim) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, var(--neuron-magenta-dim) 0%, transparent 30%);
+  background-size: 100% 100%;
+}
+
+/* Input styling */
+input[type="text"],
+input[type="search"] {
+  background: var(--nebula-dark);
+  border: 1px solid var(--nebula-light);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus {
+  border-color: var(--neuron-cyan);
+  box-shadow: 0 0 0 3px var(--neuron-cyan-dim);
+  outline: none;
+}
+
+input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* Button styling */
+.btn-primary {
+  background: var(--gradient-neuron);
+  color: var(--void-black);
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.btn-primary:hover::before {
+  transform: translateX(100%);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--nebula-mid);
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: 1px solid var(--nebula-light);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--nebula-light);
+  border-color: var(--synapse-purple);
+}
+
+/* Tag/badge styling */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--nebula-mid);
+  border: 1px solid var(--nebula-light);
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.tag:hover {
+  border-color: var(--neuron-cyan);
+  color: var(--neuron-cyan);
+}
+
+/* Cytoscape graph container enhancements */
+.graph-container {
+  position: relative;
+  background: var(--deep-space);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.graph-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, var(--neuron-cyan-dim) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, var(--synapse-purple-dim) 0%, transparent 50%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Grid pattern overlay for graphs */
+.graph-grid {
+  background-image:
+    linear-gradient(var(--nebula-mid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--nebula-mid) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center center;
 }

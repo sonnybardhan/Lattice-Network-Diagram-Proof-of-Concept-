@@ -51,35 +51,47 @@ const viewOptions: { id: ViewType; label: string; icon: React.ReactNode; descrip
 
 export function Navigation({ currentView, onViewChange, onStartScenario }: NavigationProps) {
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+    <nav className="sticky top-0 z-40" style={{
+      background: 'linear-gradient(180deg, rgba(10, 10, 15, 0.98) 0%, rgba(18, 18, 26, 0.95) 100%)',
+      borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
+      backdropFilter: 'blur(12px)',
+    }}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo / Title */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={{
+              background: 'linear-gradient(135deg, #00f5ff, #8b5cf6)',
+            }}>
+              {/* Animated glow */}
+              <div className="absolute inset-0 animate-pulse opacity-50" style={{
+                background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)',
+              }} />
+              <svg className="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">Mental Models</h1>
-              <p className="text-xs text-gray-500 hidden sm:block">Lattice POC</p>
+              <h1 className="text-lg font-bold gradient-text">Mental Models</h1>
+              <p className="text-xs hidden sm:block" style={{ color: '#6b6b80' }}>Lattice POC</p>
             </div>
           </div>
 
           {/* View Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1 p-1 rounded-xl" style={{
+            background: 'rgba(26, 26, 46, 0.6)',
+            border: '1px solid rgba(139, 92, 246, 0.15)',
+          }}>
             {viewOptions.map((option) => (
               <button
                 key={option.id}
                 onClick={() => onViewChange(option.id)}
-                className={`
-                  flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
-                  ${currentView === option.id
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }
-                `}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300"
+                style={{
+                  background: currentView === option.id ? 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(139, 92, 246, 0.15))' : 'transparent',
+                  color: currentView === option.id ? '#00f5ff' : '#a0a0b5',
+                  border: currentView === option.id ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
+                }}
                 title={option.description}
               >
                 {option.icon}
@@ -93,7 +105,12 @@ export function Navigation({ currentView, onViewChange, onStartScenario }: Navig
             <select
               value={currentView}
               onChange={(e) => onViewChange(e.target.value as ViewType)}
-              className="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full pl-3 pr-10 py-2 text-sm rounded-lg"
+              style={{
+                background: 'rgba(26, 26, 46, 0.8)',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                color: '#f0f0f5',
+              }}
             >
               {viewOptions.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -106,7 +123,7 @@ export function Navigation({ currentView, onViewChange, onStartScenario }: Navig
           {/* Action Button */}
           <button
             onClick={onStartScenario}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-300 btn-primary"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -118,15 +135,22 @@ export function Navigation({ currentView, onViewChange, onStartScenario }: Navig
       </div>
 
       {/* Breadcrumb / Context Bar */}
-      <div className="bg-gray-50 border-t border-gray-100 px-4 py-2">
+      <div className="px-4 py-2.5" style={{
+        background: 'rgba(10, 10, 15, 0.5)',
+        borderTop: '1px solid rgba(139, 92, 246, 0.1)',
+      }}>
         <div className="container mx-auto">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-400">Current view:</span>
-            <span className="font-medium text-gray-700">
+            <div className="w-2 h-2 rounded-full animate-pulse" style={{
+              background: '#00f5ff',
+              boxShadow: '0 0 8px #00f5ff',
+            }} />
+            <span style={{ color: '#6b6b80' }}>Current view:</span>
+            <span className="font-medium" style={{ color: '#00f5ff' }}>
               {viewOptions.find((v) => v.id === currentView)?.label}
             </span>
-            <span className="text-gray-400 mx-2">-</span>
-            <span className="text-gray-500">
+            <span style={{ color: '#2d2d44' }} className="mx-2">|</span>
+            <span style={{ color: '#6b6b80' }}>
               {viewOptions.find((v) => v.id === currentView)?.description}
             </span>
           </div>
@@ -147,21 +171,19 @@ export function ViewTabs({
   views?: typeof viewOptions;
 }) {
   return (
-    <div className="border-b border-gray-200">
+    <div style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
       <nav className="-mb-px flex gap-4" aria-label="Tabs">
         {views.map((view) => (
           <button
             key={view.id}
             onClick={() => onViewChange(view.id)}
-            className={`
-              group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all
-              ${currentView === view.id
-                ? 'border-indigo-500 text-indigo-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }
-            `}
+            className="group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-all duration-300"
+            style={{
+              borderColor: currentView === view.id ? '#00f5ff' : 'transparent',
+              color: currentView === view.id ? '#00f5ff' : '#6b6b80',
+            }}
           >
-            <span className={currentView === view.id ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}>
+            <span style={{ color: currentView === view.id ? '#00f5ff' : '#6b6b80' }}>
               {view.icon}
             </span>
             {view.label}
@@ -183,7 +205,10 @@ export function BackButton({
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+      className="inline-flex items-center gap-1 text-sm transition-all duration-300"
+      style={{ color: '#a0a0b5' }}
+      onMouseEnter={(e) => { e.currentTarget.style.color = '#00f5ff'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = '#a0a0b5'; }}
     >
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

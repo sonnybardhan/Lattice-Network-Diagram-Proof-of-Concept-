@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape from 'cytoscape';
 import { MentalModel } from '../../types';
@@ -8,71 +8,97 @@ interface FilteredSubgraphProps {
   onModelSelect: (modelId: string) => void;
 }
 
-// Inline model data lookup - will be replaced with import from data/models.ts
-const getModelById = (id: string, modelsData: MentalModel[]): MentalModel | undefined => {
-  return modelsData.find((m) => m.id === id);
-};
-
-// Graph styles for Cytoscape
-const graphStyles: any[] = [
+// Neural Constellation graph styles - Filtered View variant
+const graphStyles: cytoscape.StylesheetStyle[] = [
   {
     selector: 'node',
     style: {
-      'background-color': '#6366f1',
+      'background-color': '#8b5cf6',
+      'background-opacity': 0.9,
       'label': 'data(label)',
-      'color': '#1f2937',
+      'color': '#f0f0f5',
       'text-valign': 'bottom',
       'text-halign': 'center',
-      'font-size': '12px',
-      'text-margin-y': 8,
-      'width': 40,
-      'height': 40,
-    },
+      'font-size': '11px',
+      'font-family': 'Sora, sans-serif',
+      'font-weight': 500,
+      'text-margin-y': 10,
+      'width': 46,
+      'height': 46,
+      'text-wrap': 'wrap',
+      'text-max-width': '85px',
+      'text-outline-color': '#0a0a0f',
+      'text-outline-width': 2,
+      'border-width': 2,
+      'border-color': '#00f5ff',
+      'border-opacity': 0.5,
+      'transition-property': 'background-color, border-color, width, height, border-width',
+      'transition-duration': 300,
+    } as any,
   },
   {
     selector: 'node.best-fit',
     style: {
-      'background-color': '#4f46e5',
-      'width': 55,
-      'height': 55,
-      'font-weight': 'bold',
+      'background-color': '#ffd700',
+      'background-opacity': 1,
+      'width': 65,
+      'height': 65,
+      'font-weight': 700,
       'font-size': '13px',
-      'border-width': 3,
-      'border-color': '#312e81',
-    },
+      'border-width': 4,
+      'border-color': '#ffffff',
+      'border-opacity': 1,
+      'text-margin-y': 14,
+    } as any,
   },
   {
     selector: 'node:hover',
     style: {
-      'background-color': '#4338ca',
+      'background-color': '#00f5ff',
+      'border-color': '#ffffff',
+      'border-width': 3,
       'cursor': 'pointer',
-    },
+      'width': 54,
+      'height': 54,
+    } as any,
   },
   {
     selector: 'edge',
     style: {
       'width': 2,
-      'line-color': '#d1d5db',
+      'line-color': '#8b5cf650',
       'curve-style': 'bezier',
-    },
+      'line-opacity': 0.6,
+      'transition-property': 'line-color, width, line-opacity',
+      'transition-duration': 300,
+    } as any,
   },
   {
     selector: 'edge[strength = "strong"]',
     style: {
       'width': 4,
-      'line-color': '#9ca3af',
-    },
+      'line-color': '#00f5ff50',
+      'line-opacity': 0.8,
+    } as any,
   },
   {
     selector: 'edge[strength = "moderate"]',
     style: {
       'width': 2,
-      'line-color': '#d1d5db',
-    },
+      'line-color': '#8b5cf640',
+    } as any,
+  },
+  {
+    selector: 'edge.highlighted',
+    style: {
+      'width': 4,
+      'line-color': '#00f5ff',
+      'line-opacity': 1,
+    } as any,
   },
 ];
 
-// Sample models data - will be replaced with import from data/models.ts
+// Sample models data
 const sampleModels: MentalModel[] = [
   {
     id: 'first-principles',
@@ -160,7 +186,6 @@ const sampleModels: MentalModel[] = [
   },
 ];
 
-// Sample edges data - will be replaced with import from data/edges.ts
 const sampleEdges = [
   { source: 'first-principles', target: 'inversion', strength: 'strong' as const },
   { source: 'inversion', target: 'pre-mortem', strength: 'strong' as const },
@@ -172,24 +197,20 @@ const sampleEdges = [
 
 export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphProps) {
   const cyRef = useRef<cytoscape.Core | null>(null);
+  const [hoveredModel, setHoveredModel] = useState<string | null>(null);
 
-  // Use sample data or try to import from data files
   const modelsData = sampleModels;
   const edgesData = sampleEdges;
 
-  // Get the filtered models
   const filteredModels = useMemo(() => {
     if (modelIds.length === 0) {
-      // Show sample data if no filter applied
       return modelsData;
     }
     return modelsData.filter((m) => modelIds.includes(m.id));
   }, [modelIds, modelsData]);
 
-  // Determine best fit (first model in list for now - can be enhanced with scoring)
   const bestFitId = filteredModels.length > 0 ? filteredModels[0].id : null;
 
-  // Convert to Cytoscape elements
   const elements = useMemo(() => {
     const nodeSet = new Set(filteredModels.map((m) => m.id));
 
@@ -201,12 +222,10 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
       classes: model.id === bestFitId ? 'best-fit' : '',
     }));
 
-    // Only include edges where both endpoints are in the filtered set
     const relevantEdges = edgesData.filter(
       (e) => nodeSet.has(e.source) && nodeSet.has(e.target)
     );
 
-    // Also add edges from adjacentModels data
     const additionalEdges: typeof sampleEdges = [];
     filteredModels.forEach((model) => {
       model.adjacentModels.forEach((adjId) => {
@@ -245,29 +264,28 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
     return [...nodes, ...edgeElements];
   }, [filteredModels, edgesData, bestFitId]);
 
-  // Layout configuration
   const layout = useMemo(
     () => ({
       name: 'cose',
-      idealEdgeLength: 120,
-      nodeOverlap: 20,
+      idealEdgeLength: 140,
+      nodeOverlap: 30,
       refresh: 20,
       fit: true,
-      padding: 40,
+      padding: 50,
       randomize: false,
-      componentSpacing: 120,
-      nodeRepulsion: 500000,
+      componentSpacing: 140,
+      nodeRepulsion: 600000,
       edgeElasticity: 100,
       nestingFactor: 5,
       gravity: 80,
       numIter: 1000,
       animate: true,
-      animationDuration: 500,
+      animationDuration: 600,
+      animationEasing: 'ease-out-cubic',
     }),
     []
   );
 
-  // Handle node click
   useEffect(() => {
     if (cyRef.current) {
       cyRef.current.on('tap', 'node', (evt) => {
@@ -284,16 +302,43 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
   }, [onModelSelect]);
 
   return (
-    <div className="flex h-[calc(100vh-120px)] gap-4">
-      {/* Graph Container - Left Side */}
-      <div className="w-3/5 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-        <div className="p-3 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-800">Filtered Mental Models</h2>
-          <p className="text-sm text-gray-500">
-            {filteredModels.length} models matching your scenario
+    <div className="flex h-[calc(100vh-120px)] gap-6">
+      {/* Graph Container */}
+      <div className="w-3/5 relative overflow-hidden" style={{
+        background: 'linear-gradient(145deg, #0a0a0f 0%, #12121a 50%, #1a1a2e 100%)',
+        borderRadius: '24px',
+        border: '1px solid rgba(139, 92, 246, 0.25)',
+      }}>
+        {/* Ambient glow effects */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: `
+            radial-gradient(ellipse 70% 50% at 30% 30%, rgba(255, 215, 0, 0.1) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 70% 70%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 245, 255, 0.08) 0%, transparent 50%)
+          `,
+        }} />
+
+        {/* Header */}
+        <div className="absolute top-0 left-0 right-0 p-5 z-10" style={{
+          background: 'linear-gradient(180deg, rgba(10, 10, 15, 0.95) 0%, transparent 100%)',
+        }}>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full animate-pulse" style={{
+              background: '#ffd700',
+              boxShadow: '0 0 12px #ffd700, 0 0 24px rgba(255, 215, 0, 0.5)',
+            }} />
+            <h2 className="text-lg font-semibold" style={{ color: '#f0f0f5' }}>
+              Filtered Mental Models
+            </h2>
+          </div>
+          <p className="text-sm mt-1" style={{ color: '#a0a0b5' }}>
+            <span className="font-medium" style={{ color: '#ffd700' }}>{filteredModels.length}</span>
+            {' '}models matching your scenario
           </p>
         </div>
-        <div className="h-[calc(100%-60px)]">
+
+        {/* Graph */}
+        <div className="h-full pt-16">
           <CytoscapeComponent
             elements={elements}
             style={{ width: '100%', height: '100%' }}
@@ -301,73 +346,143 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
             layout={layout}
             cy={(cy) => {
               cyRef.current = cy;
+
+              cy.on('mouseover', 'node', (evt) => {
+                const node = evt.target;
+                setHoveredModel(node.id());
+                node.connectedEdges().addClass('highlighted');
+              });
+
+              cy.on('mouseout', 'node', () => {
+                setHoveredModel(null);
+                cy.edges().removeClass('highlighted');
+              });
             }}
           />
         </div>
+
+        {/* Floating interaction hint */}
+        {hoveredModel && (
+          <div className="absolute bottom-4 left-4 px-4 py-2 rounded-xl text-sm font-medium animate-fade-in-up" style={{
+            background: 'rgba(0, 245, 255, 0.15)',
+            border: '1px solid rgba(0, 245, 255, 0.4)',
+            color: '#00f5ff',
+            backdropFilter: 'blur(10px)',
+          }}>
+            Click to explore {sampleModels.find(m => m.id === hoveredModel)?.name}
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="absolute bottom-4 right-4 px-4 py-3 rounded-xl" style={{
+          background: 'rgba(10, 10, 15, 0.9)',
+          border: '1px solid rgba(139, 92, 246, 0.3)',
+          backdropFilter: 'blur(10px)',
+        }}>
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ background: '#ffd700', boxShadow: '0 0 8px rgba(255, 215, 0, 0.5)' }} />
+              <span style={{ color: '#a0a0b5' }}>Best Fit</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ background: '#8b5cf6' }} />
+              <span style={{ color: '#a0a0b5' }}>Related</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Model List Panel - Right Side */}
-      <div className="w-2/5 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-        <div className="p-3 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-semibold text-gray-800">Model List</h2>
-          <p className="text-sm text-gray-500">Click a model to explore its network</p>
+      {/* Model List Panel */}
+      <div className="w-2/5 overflow-hidden" style={{
+        background: 'linear-gradient(145deg, #12121a 0%, #1a1a2e 100%)',
+        borderRadius: '24px',
+        border: '1px solid rgba(139, 92, 246, 0.25)',
+      }}>
+        {/* Panel Header */}
+        <div className="p-5 border-b" style={{ borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" style={{ color: '#8b5cf6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            <h2 className="text-lg font-semibold" style={{ color: '#f0f0f5' }}>Model List</h2>
+          </div>
+          <p className="text-sm mt-1" style={{ color: '#a0a0b5' }}>Click a model to explore its network</p>
         </div>
-        <div className="overflow-y-auto h-[calc(100%-60px)]">
-          {filteredModels.map((model, index) => (
-            <div
-              key={model.id}
-              className={`p-4 border-b border-gray-100 hover:bg-indigo-50 cursor-pointer transition-colors ${
-                model.id === bestFitId ? 'bg-indigo-50 border-l-4 border-l-indigo-500' : ''
-              }`}
-              onClick={() => onModelSelect(model.id)}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-gray-900">{model.name}</h3>
-                    {model.id === bestFitId && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">
-                        Best Fit
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-sm text-gray-600 italic">
-                    "{model.diagnosticQuestion}"
-                  </p>
-                  <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-                    {model.keyInsight}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="mt-3 text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onModelSelect(model.id);
+
+        <div className="overflow-y-auto h-[calc(100%-90px)]">
+          {filteredModels.map((model, index) => {
+            const isBestFit = model.id === bestFitId;
+            const isHovered = hoveredModel === model.id;
+
+            return (
+              <div
+                key={model.id}
+                className="p-4 border-b cursor-pointer transition-all duration-300"
+                style={{
+                  borderColor: 'rgba(139, 92, 246, 0.1)',
+                  background: isHovered
+                    ? 'rgba(0, 245, 255, 0.08)'
+                    : isBestFit
+                      ? 'rgba(255, 215, 0, 0.08)'
+                      : 'transparent',
+                  borderLeft: isBestFit ? '3px solid #ffd700' : '3px solid transparent',
                 }}
+                onClick={() => onModelSelect(model.id)}
+                onMouseEnter={() => setHoveredModel(model.id)}
+                onMouseLeave={() => setHoveredModel(null)}
               >
-                Learn more
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold" style={{ color: isHovered ? '#00f5ff' : '#f0f0f5' }}>
+                        {model.name}
+                      </h3>
+                      {isBestFit && (
+                        <span className="px-2 py-0.5 text-xs font-semibold rounded-full" style={{
+                          background: 'rgba(255, 215, 0, 0.2)',
+                          color: '#ffd700',
+                          border: '1px solid rgba(255, 215, 0, 0.4)',
+                        }}>
+                          Best Fit
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1.5 text-sm italic" style={{ color: '#00f5ff' }}>
+                      "{model.diagnosticQuestion}"
+                    </p>
+                    <p className="mt-2 text-sm line-clamp-2" style={{ color: '#a0a0b5' }}>
+                      {model.keyInsight}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="mt-3 text-sm font-medium flex items-center gap-1 transition-all duration-300"
+                  style={{ color: isHovered ? '#00f5ff' : '#8b5cf6' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onModelSelect(model.id);
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
-          ))}
+                  Explore network
+                  <svg
+                    className="w-4 h-4 transition-transform duration-300"
+                    style={{ transform: isHovered ? 'translateX(4px)' : 'none' }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })}
 
           {filteredModels.length === 0 && (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center" style={{ color: '#6b6b80' }}>
               <svg
-                className="mx-auto h-12 w-12 text-gray-400"
+                className="mx-auto h-16 w-16 mb-4"
+                style={{ color: '#2d2d44' }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -379,8 +494,8 @@ export function FilteredSubgraph({ modelIds, onModelSelect }: FilteredSubgraphPr
                   d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <p className="mt-2">No models found</p>
-              <p className="text-sm">Try adjusting your filters</p>
+              <p className="font-medium" style={{ color: '#a0a0b5' }}>No models found</p>
+              <p className="text-sm mt-1">Try adjusting your filters</p>
             </div>
           )}
         </div>
